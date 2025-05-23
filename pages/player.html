@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>播放器 - 小宇宙播客</title>
+    <meta name="description" content="高品质音频播放体验，支持播放列表、音质设置等功能" />
+    <meta name="keywords" content="播客,播放器,音频播放" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-900 text-white min-h-screen" x-data="playerApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="minimizePlayer" class="text-gray-400 hover:text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 14l-7-7m0 0l-7 7m7-7v18"
+                ></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold">正在播放</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button class="text-gray-400 hover:text-white" @click="toggleQueue">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+            <button class="text-gray-400 hover:text-white" @click="toggleSettings">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex h-screen pt-16">
+      <!-- 主播放器区域 -->
+      <div class="flex-1 flex flex-col">
+        <!-- 专辑封面区域 -->
+        <div class="flex-1 flex items-center justify-center p-8">
+          <div class="max-w-2xl w-full">
+            <!-- 专辑封面 -->
+            <div class="relative mx-auto w-80 h-80 md:w-96 md:h-96 mb-8">
+              <img
+                :src="currentEpisode.image"
+                :alt="currentEpisode.title"
+                class="w-full h-full object-cover rounded-2xl shadow-2xl"
+                :class="{'album-rotating': isPlaying, 'paused': !isPlaying}"
+              />
+              <!-- 光影效果 -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl"></div>
+
+              <!-- 播放状态指示 -->
+              <div class="absolute inset-0 flex items-center justify-center" x-show="!isPlaying && showPlayOverlay">
+                <div class="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <svg class="w-8 h-8 text-gray-900 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- 单集信息 -->
+            <div class="text-center mb-8">
+              <h2
+                class="text-2xl md:text-3xl font-bold text-white mb-3 line-clamp-2"
+                x-text="currentEpisode.title"
+              ></h2>
+              <p class="text-lg text-gray-300 mb-2" x-text="currentEpisode.podcast"></p>
+              <p class="text-gray-400" x-text="currentEpisode.author"></p>
+            </div>
+
+            <!-- 进度条 -->
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
+                <span x-text="formatTime(currentTime)">0:00</span>
+                <span x-text="formatTime(duration)">0:00</span>
+              </div>
+              <div class="progress-bar h-2 bg-gray-700 rounded-full cursor-pointer" @click="seekTo($event)">
+                <div
+                  class="progress h-full bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full relative"
+                  :style="`width: ${progress * 100}%`"
+                >
+                  <div
+                    class="thumb absolute right-0 top-1/2 w-4 h-4 bg-white rounded-full shadow-lg transform -translate-y-1/2 translate-x-1/2"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 播放控制 -->
+            <div class="flex items-center justify-center space-x-6 mb-8">
+              <!-- 随机播放 -->
+              <button
+                class="text-gray-400 hover:text-white transition-colors"
+                :class="{'text-podcast-primary': shuffle}"
+                @click="toggleShuffle"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4h6l4 4-4 4H4V4zM20 12h-6l-4-4 4-4h6v8z"
+                  ></path>
+                </svg>
+              </button>
+
+              <!-- 上一首 -->
+              <button class="text-white hover:text-podcast-primary transition-colors" @click="previousTrack">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414zm-6 0a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 011.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+
+              <!-- 播放/暂停 -->
+              <button
+                class="w-16 h-16 bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+                @click="togglePlay"
+              >
+                <svg x-show="!isPlaying" class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <svg x-show="isPlaying" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+
+              <!-- 下一首 -->
+              <button class="text-white hover:text-podcast-primary transition-colors" @click="nextTrack">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414zm6 0a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L14.586 10l-4.293-4.293a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+
+              <!-- 循环播放 -->
+              <button
+                class="text-gray-400 hover:text-white transition-colors"
+                :class="{'text-podcast-primary': repeat === 'all', 'text-podcast-secondary': repeat === 'one'}"
+                @click="toggleRepeat"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  ></path>
+                </svg>
+                <span x-show="repeat === 'one'" class="absolute -mt-1 -ml-1 text-xs">1</span>
+              </button>
+            </div>
+
+            <!-- 额外控制 -->
+            <div class="flex items-center justify-between">
+              <!-- 音量控制 -->
+              <div class="flex items-center space-x-3">
+                <button @click="toggleMute" class="text-gray-400 hover:text-white">
+                  <svg x-show="!isMuted && volume > 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  <svg x-show="!isMuted && volume <= 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  <svg x-show="isMuted" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  x-model="volume"
+                  @input="setVolume"
+                  class="w-20 volume-slider"
+                />
+              </div>
+
+              <!-- 播放速度 -->
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-400">速度</span>
+                <select
+                  x-model="playbackRate"
+                  @change="setPlaybackRate"
+                  class="bg-gray-700 text-white text-sm rounded px-2 py-1 border border-gray-600"
+                >
+                  <option value="0.5">0.5x</option>
+                  <option value="0.75">0.75x</option>
+                  <option value="1">1x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2">2x</option>
+                </select>
+              </div>
+
+              <!-- 收藏按钮 -->
+              <button
+                @click="toggleFavorite"
+                class="text-gray-400 hover:text-red-500 transition-colors"
+                :class="{'text-red-500': currentEpisode.isFavorite}"
+              >
+                <svg
+                  class="w-6 h-6"
+                  :fill="currentEpisode.isFavorite ? 'currentColor' : 'none'"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 音频波形可视化 (可选) -->
+        <div class="px-8 pb-4" x-show="showWaveform">
+          <div class="audio-wave flex items-center justify-center space-x-1">
+            <template x-for="i in 50" :key="i">
+              <div class="bar bg-podcast-primary opacity-60" :style="`height: ${Math.random() * 20 + 5}px`"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 播放队列侧边栏 -->
+      <div
+        class="w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto transition-transform duration-300"
+        :class="{'translate-x-full': !showQueue, 'translate-x-0': showQueue}"
+        x-show="showQueue"
+      >
+        <div class="p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">播放队列</h3>
+            <button @click="clearQueue" class="text-sm text-gray-400 hover:text-white">清空</button>
+          </div>
+
+          <div class="space-y-2">
+            <template x-for="(episode, index) in queue" :key="episode.id">
+              <div
+                class="flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors"
+                :class="{'bg-podcast-primary bg-opacity-20': currentIndex === index, 'hover:bg-gray-700': currentIndex !== index}"
+                @click="playFromQueue(index)"
+              >
+                <div class="relative">
+                  <img :src="episode.image" :alt="episode.title" class="w-12 h-12 rounded-lg object-cover" />
+                  <div
+                    x-show="currentIndex === index && isPlaying"
+                    class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg"
+                  >
+                    <div class="audio-wave">
+                      <div class="bar"></div>
+                      <div class="bar"></div>
+                      <div class="bar"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-medium text-white line-clamp-1" x-text="episode.title"></h4>
+                  <p class="text-sm text-gray-400 line-clamp-1" x-text="episode.podcast"></p>
+                  <p class="text-xs text-gray-500" x-text="formatTime(episode.duration)"></p>
+                </div>
+                <button @click.stop="removeFromQueue(index)" class="text-gray-400 hover:text-red-500">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置面板 -->
+      <div
+        x-show="showSettings"
+        x-cloak
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+        @click.self="showSettings = false"
+      >
+        <div class="bg-gray-800 rounded-lg p-6 w-96 max-w-full mx-4">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">播放器设置</h3>
+            <button @click="showSettings = false" class="text-gray-400 hover:text-white">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- 音质设置 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">音质</label>
+              <select x-model="audioQuality" class="w-full bg-gray-700 text-white rounded px-3 py-2">
+                <option value="low">普通 (64kbps)</option>
+                <option value="medium">标准 (128kbps)</option>
+                <option value="high">高品质 (192kbps)</option>
+                <option value="lossless">无损 (FLAC)</option>
+              </select>
+            </div>
+
+            <!-- 自动播放下一集 -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-medium text-gray-300">自动播放下一集</label>
+              <button
+                @click="autoPlayNext = !autoPlayNext"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                :class="autoPlayNext ? 'bg-podcast-primary' : 'bg-gray-600'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  :class="autoPlayNext ? 'translate-x-6' : 'translate-x-1'"
+                ></span>
+              </button>
+            </div>
+
+            <!-- 睡眠定时器 -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">睡眠定时器</label>
+              <select
+                x-model="sleepTimer"
+                @change="setSleepTimer"
+                class="w-full bg-gray-700 text-white rounded px-3 py-2"
+              >
+                <option value="0">关闭</option>
+                <option value="900">15分钟</option>
+                <option value="1800">30分钟</option>
+                <option value="3600">1小时</option>
+                <option value="7200">2小时</option>
+              </select>
+            </div>
+
+            <!-- 显示波形 -->
+            <div class="flex items-center justify-between">
+              <label class="text-sm font-medium text-gray-300">显示音频波形</label>
+              <button
+                @click="showWaveform = !showWaveform"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                :class="showWaveform ? 'bg-podcast-primary' : 'bg-gray-600'"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  :class="showWaveform ? 'translate-x-6' : 'translate-x-1'"
+                ></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function playerApp() {
+        return {
+          // 播放状态
+          isPlaying: false,
+          currentTime: 0,
+          duration: 3600, // 示例：60分钟
+          progress: 0,
+          volume: 0.8,
+          isMuted: false,
+          playbackRate: 1,
+
+          // 播放模式
+          shuffle: false,
+          repeat: "none", // none, all, one
+          autoPlayNext: true,
+
+          // UI 状态
+          showQueue: false,
+          showSettings: false,
+          showWaveform: true,
+          showPlayOverlay: true,
+
+          // 当前播放内容
+          currentIndex: 0,
+          currentEpisode: {
+            id: 1,
+            title: "人工智能的未来展望：从GPT到AGI的演进之路",
+            podcast: "科技聊天室",
+            author: "科技小栈",
+            image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+            duration: 3600,
+            isFavorite: false,
+          },
+
+          // 播放队列
+          queue: [
+            {
+              id: 1,
+              title: "人工智能的未来展望：从GPT到AGI的演进之路",
+              podcast: "科技聊天室",
+              image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+              duration: 3600,
+            },
+            {
+              id: 2,
+              title: "创业公司的融资策略：从种子轮到IPO",
+              podcast: "商业新视角",
+              image: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=400&h=400&fit=crop",
+              duration: 2400,
+            },
+            {
+              id: 3,
+              title: "极简生活的艺术：如何在快节奏中找到内心平静",
+              podcast: "生活美学",
+              image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+              duration: 1980,
+            },
+          ],
+
+          // 设置
+          audioQuality: "high",
+          sleepTimer: 0,
+          sleepTimerActive: false,
+
+          init() {
+            // 模拟播放进度
+            setInterval(() => {
+              if (this.isPlaying) {
+                this.currentTime += 1;
+                this.progress = this.currentTime / this.duration;
+
+                if (this.currentTime >= this.duration) {
+                  this.nextTrack();
+                }
+              }
+            }, 1000);
+
+            // 键盘快捷键
+            document.addEventListener("keydown", (e) => {
+              switch (e.code) {
+                case "Space":
+                  e.preventDefault();
+                  this.togglePlay();
+                  break;
+                case "ArrowLeft":
+                  if (e.shiftKey) {
+                    e.preventDefault();
+                    this.seekBackward();
+                  }
+                  break;
+                case "ArrowRight":
+                  if (e.shiftKey) {
+                    e.preventDefault();
+                    this.seekForward();
+                  }
+                  break;
+              }
+            });
+          },
+
+          togglePlay() {
+            this.isPlaying = !this.isPlaying;
+            this.showPlayOverlay = false;
+          },
+
+          toggleQueue() {
+            this.showQueue = !this.showQueue;
+          },
+
+          toggleSettings() {
+            this.showSettings = !this.showSettings;
+          },
+
+          toggleShuffle() {
+            this.shuffle = !this.shuffle;
+          },
+
+          toggleRepeat() {
+            const modes = ["none", "all", "one"];
+            const currentIndex = modes.indexOf(this.repeat);
+            this.repeat = modes[(currentIndex + 1) % modes.length];
+          },
+
+          toggleMute() {
+            this.isMuted = !this.isMuted;
+          },
+
+          toggleFavorite() {
+            this.currentEpisode.isFavorite = !this.currentEpisode.isFavorite;
+          },
+
+          setVolume() {
+            // 实际项目中这里会调用音频API
+            console.log("设置音量:", this.volume);
+          },
+
+          setPlaybackRate() {
+            // 实际项目中这里会调用音频API
+            console.log("设置播放速度:", this.playbackRate);
+          },
+
+          seekTo(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            this.currentTime = percent * this.duration;
+            this.progress = percent;
+          },
+
+          seekForward(seconds = 30) {
+            this.currentTime = Math.min(this.currentTime + seconds, this.duration);
+            this.progress = this.currentTime / this.duration;
+          },
+
+          seekBackward(seconds = 30) {
+            this.currentTime = Math.max(this.currentTime - seconds, 0);
+            this.progress = this.currentTime / this.duration;
+          },
+
+          previousTrack() {
+            if (this.currentIndex > 0) {
+              this.currentIndex--;
+              this.loadTrack(this.currentIndex);
+            }
+          },
+
+          nextTrack() {
+            if (this.repeat === "one") {
+              this.currentTime = 0;
+              this.progress = 0;
+              return;
+            }
+
+            if (this.currentIndex < this.queue.length - 1) {
+              this.currentIndex++;
+              this.loadTrack(this.currentIndex);
+            } else if (this.repeat === "all") {
+              this.currentIndex = 0;
+              this.loadTrack(this.currentIndex);
+            } else {
+              this.isPlaying = false;
+            }
+          },
+
+          playFromQueue(index) {
+            this.currentIndex = index;
+            this.loadTrack(index);
+            this.isPlaying = true;
+          },
+
+          loadTrack(index) {
+            const episode = this.queue[index];
+            this.currentEpisode = { ...episode, isFavorite: episode.isFavorite || false };
+            this.currentTime = 0;
+            this.progress = 0;
+            this.duration = episode.duration;
+          },
+
+          removeFromQueue(index) {
+            this.queue.splice(index, 1);
+            if (index < this.currentIndex) {
+              this.currentIndex--;
+            } else if (index === this.currentIndex && this.queue.length > 0) {
+              this.loadTrack(Math.min(this.currentIndex, this.queue.length - 1));
+            }
+          },
+
+          clearQueue() {
+            this.queue = [];
+            this.currentIndex = 0;
+            this.isPlaying = false;
+          },
+
+          setSleepTimer() {
+            if (this.sleepTimer > 0) {
+              this.sleepTimerActive = true;
+              setTimeout(() => {
+                this.isPlaying = false;
+                this.sleepTimerActive = false;
+              }, this.sleepTimer * 1000);
+            } else {
+              this.sleepTimerActive = false;
+            }
+          },
+
+          minimizePlayer() {
+            // 返回上一页或最小化播放器
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+
+            if (hours > 0) {
+              return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+            }
+            return `${minutes}:${secs.toString().padStart(2, "0")}`;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

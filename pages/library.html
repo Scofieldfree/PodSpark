@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>我的播客库 - 小宇宙播客</title>
+    <meta name="description" content="管理您的播客订阅、收藏和下载内容" />
+    <meta name="keywords" content="播客库,订阅,收藏,下载" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="libraryApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">我的播客库</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button @click="toggleView" class="p-2 text-gray-600 hover:text-gray-900 rounded-lg">
+              <svg x-show="viewMode === 'grid'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                ></path>
+              </svg>
+              <svg x-show="viewMode === 'list'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- 标签导航 -->
+      <div class="mb-8">
+        <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+          <button
+            @click="activeTab = 'subscriptions'"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="activeTab === 'subscriptions' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            订阅 (<span x-text="subscriptions.length"></span>)
+          </button>
+          <button
+            @click="activeTab = 'favorites'"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="activeTab === 'favorites' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            收藏 (<span x-text="favorites.length"></span>)
+          </button>
+          <button
+            @click="activeTab = 'downloads'"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="activeTab === 'downloads' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            下载 (<span x-text="downloads.length"></span>)
+          </button>
+          <button
+            @click="activeTab = 'history'"
+            class="px-4 py-2 text-sm font-medium rounded-md transition-colors"
+            :class="activeTab === 'history' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            历史记录
+          </button>
+        </div>
+      </div>
+
+      <!-- 订阅页面 -->
+      <div x-show="activeTab === 'subscriptions'">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">我的订阅</h2>
+          <select
+            x-model="sortBy"
+            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+          >
+            <option value="recent">最近更新</option>
+            <option value="name">名称排序</option>
+            <option value="episodes">单集数量</option>
+          </select>
+        </div>
+
+        <div :class="viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'">
+          <template x-for="podcast in subscriptions" :key="podcast.id">
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow podcast-card">
+              <div class="p-6">
+                <div :class="viewMode === 'grid' ? 'text-center' : 'flex items-center space-x-4'">
+                  <div :class="viewMode === 'grid' ? 'mb-4' : 'flex-shrink-0'">
+                    <img
+                      :src="podcast.image"
+                      :alt="podcast.title"
+                      :class="viewMode === 'grid' ? 'w-24 h-24 mx-auto rounded-xl object-cover' : 'w-16 h-16 rounded-xl object-cover'"
+                    />
+                  </div>
+                  <div :class="viewMode === 'grid' ? '' : 'flex-1 min-w-0'">
+                    <h3
+                      :class="viewMode === 'grid' ? 'font-semibold text-gray-900 mb-2' : 'font-semibold text-gray-900 line-clamp-1'"
+                      x-text="podcast.title"
+                    ></h3>
+                    <p
+                      :class="viewMode === 'grid' ? 'text-sm text-gray-600 mb-3' : 'text-sm text-gray-600'"
+                      x-text="podcast.author"
+                    ></p>
+                    <div
+                      :class="viewMode === 'grid' ? 'text-sm text-gray-500 space-y-1' : 'flex items-center space-x-4 text-sm text-gray-500 mt-2'"
+                    >
+                      <div :class="viewMode === 'grid' ? '' : 'flex items-center space-x-4'">
+                        <span x-text="podcast.episodeCount + ' 集'"></span>
+                        <span x-show="podcast.newEpisodes > 0" class="text-podcast-primary font-medium">
+                          <span x-text="podcast.newEpisodes + ' 个新单集'"></span>
+                        </span>
+                      </div>
+                      <div
+                        x-show="viewMode === 'grid'"
+                        class="text-xs text-gray-400"
+                        x-text="'最后更新: ' + formatDate(podcast.lastUpdated)"
+                      ></div>
+                    </div>
+                  </div>
+                  <div :class="viewMode === 'grid' ? 'mt-4 space-y-2' : 'flex flex-col space-y-2'">
+                    <button
+                      @click="playLatest(podcast)"
+                      class="w-full px-4 py-2 bg-podcast-primary text-white text-sm rounded-lg hover:bg-podcast-secondary transition-colors"
+                    >
+                      播放最新
+                    </button>
+                    <button
+                      @click="unsubscribe(podcast)"
+                      class="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      取消订阅
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-show="subscriptions.length === 0" class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">还没有订阅任何播客</h3>
+          <p class="text-gray-600 mb-4">去发现页面找找感兴趣的播客吧</p>
+          <button
+            @click="goToDiscover"
+            class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+          >
+            去发现
+          </button>
+        </div>
+      </div>
+
+      <!-- 收藏页面 -->
+      <div x-show="activeTab === 'favorites'">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">我的收藏</h2>
+          <select
+            x-model="favoriteSort"
+            class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+          >
+            <option value="recent">最近收藏</option>
+            <option value="duration">时长排序</option>
+            <option value="podcast">播客分组</option>
+          </select>
+        </div>
+
+        <div class="space-y-4">
+          <template x-for="episode in favorites" :key="episode.id">
+            <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+              <div class="flex items-start space-x-4">
+                <img
+                  :src="episode.podcastImage"
+                  :alt="episode.podcastTitle"
+                  class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2" x-text="episode.title"></h4>
+                  <p class="text-gray-600 mb-2" x-text="episode.podcastTitle + ' · ' + episode.author"></p>
+                  <p class="text-gray-500 text-sm mb-3 line-clamp-2" x-text="episode.description"></p>
+                  <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span x-text="formatDate(episode.publishDate)"></span>
+                    <span x-text="formatDuration(episode.duration)"></span>
+                    <span x-text="'收藏于 ' + formatDate(episode.favoriteDate)"></span>
+                  </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                  <button
+                    @click="playEpisode(episode)"
+                    class="px-4 py-2 text-sm font-medium bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                  >
+                    播放
+                  </button>
+                  <button
+                    @click="removeFavorite(episode)"
+                    class="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    移除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-show="favorites.length === 0" class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">还没有收藏任何单集</h3>
+          <p class="text-gray-600">收藏喜欢的单集，方便以后回听</p>
+        </div>
+      </div>
+
+      <!-- 下载页面 -->
+      <div x-show="activeTab === 'downloads'">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">下载管理</h2>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-600">总大小: <span x-text="totalDownloadSize"></span></span>
+            <button
+              @click="cleanupDownloads"
+              class="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              清理完成
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <template x-for="download in downloads" :key="download.id">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+              <div class="flex items-start space-x-4">
+                <img
+                  :src="download.podcastImage"
+                  :alt="download.podcastTitle"
+                  class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2" x-text="download.title"></h4>
+                  <p class="text-gray-600 mb-2" x-text="download.podcastTitle"></p>
+                  <div class="mb-3">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                      <span class="text-gray-500" x-text="getDownloadStatus(download.status)"></span>
+                      <span class="text-gray-500" x-text="download.size"></span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        class="h-2 rounded-full transition-all duration-300"
+                        :class="download.status === 'completed' ? 'bg-green-500' : download.status === 'downloading' ? 'bg-podcast-primary' : 'bg-gray-400'"
+                        :style="`width: ${download.progress}%`"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span x-text="formatDuration(download.duration)"></span>
+                    <span x-text="'下载于 ' + formatDate(download.downloadDate)"></span>
+                  </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                  <button
+                    x-show="download.status === 'completed'"
+                    @click="playEpisode(download)"
+                    class="px-4 py-2 text-sm font-medium bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                  >
+                    播放
+                  </button>
+                  <button
+                    x-show="download.status === 'downloading'"
+                    @click="pauseDownload(download)"
+                    class="px-4 py-2 text-sm text-yellow-600 border border-yellow-300 rounded-lg hover:bg-yellow-50 transition-colors"
+                  >
+                    暂停
+                  </button>
+                  <button
+                    @click="deleteDownload(download)"
+                    class="px-4 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                  >
+                    删除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-show="downloads.length === 0" class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">还没有下载任何内容</h3>
+          <p class="text-gray-600">下载播客单集，离线也能收听</p>
+        </div>
+      </div>
+
+      <!-- 历史记录页面 -->
+      <div x-show="activeTab === 'history'">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-bold text-gray-900">播放历史</h2>
+          <button
+            @click="clearHistory"
+            class="px-3 py-2 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
+          >
+            清空历史
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <template x-for="(item, index) in history" :key="item.id">
+            <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+              <div class="flex items-start space-x-4">
+                <img
+                  :src="item.podcastImage"
+                  :alt="item.podcastTitle"
+                  class="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <h4 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2" x-text="item.title"></h4>
+                  <p class="text-gray-600 mb-2" x-text="item.podcastTitle + ' · ' + item.author"></p>
+                  <div class="mb-3">
+                    <div class="flex items-center justify-between text-sm mb-1">
+                      <span class="text-gray-500">播放进度</span>
+                      <span class="text-gray-500" x-text="Math.round(item.progress * 100) + '%'"></span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                      <div class="bg-podcast-primary h-2 rounded-full" :style="`width: ${item.progress * 100}%`"></div>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span x-text="formatDuration(item.duration)"></span>
+                    <span x-text="'收听于 ' + formatDate(item.playDate)"></span>
+                  </div>
+                </div>
+                <div class="flex flex-col space-y-2">
+                  <button
+                    @click="continuePlay(item)"
+                    class="px-4 py-2 text-sm font-medium bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                  >
+                    继续播放
+                  </button>
+                  <button
+                    @click="removeFromHistory(item)"
+                    class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    移除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div x-show="history.length === 0" class="text-center py-12">
+          <div class="text-gray-400 mb-4">
+            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">还没有播放历史</h3>
+          <p class="text-gray-600">开始收听播客，这里会记录您的播放历史</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function libraryApp() {
+        return {
+          activeTab: "subscriptions",
+          viewMode: "grid",
+          sortBy: "recent",
+          favoriteSort: "recent",
+
+          subscriptions: [
+            {
+              id: 1,
+              title: "科技聊天室",
+              author: "科技小栈",
+              image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=300&h=300&fit=crop",
+              episodeCount: 125,
+              newEpisodes: 3,
+              lastUpdated: "2024-01-15",
+            },
+            {
+              id: 2,
+              title: "商业新视角",
+              author: "商业观察者",
+              image: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=300&h=300&fit=crop",
+              episodeCount: 89,
+              newEpisodes: 1,
+              lastUpdated: "2024-01-12",
+            },
+          ],
+
+          favorites: [
+            {
+              id: 1,
+              title: "人工智能的未来展望：从GPT到AGI的演进之路",
+              description: "深入探讨人工智能技术的发展趋势",
+              podcastTitle: "科技聊天室",
+              podcastImage: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=300&h=300&fit=crop",
+              author: "科技小栈",
+              duration: 2580,
+              publishDate: "2024-01-15",
+              favoriteDate: "2024-01-16",
+            },
+          ],
+
+          downloads: [
+            {
+              id: 1,
+              title: "创业公司的融资策略",
+              podcastTitle: "商业新视角",
+              podcastImage: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=300&h=300&fit=crop",
+              duration: 2100,
+              size: "45.2 MB",
+              status: "completed",
+              progress: 100,
+              downloadDate: "2024-01-14",
+            },
+            {
+              id: 2,
+              title: "区块链技术深度解析",
+              podcastTitle: "科技聊天室",
+              podcastImage: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=300&h=300&fit=crop",
+              duration: 3240,
+              size: "62.8 MB",
+              status: "downloading",
+              progress: 65,
+              downloadDate: "2024-01-16",
+            },
+          ],
+
+          history: [
+            {
+              id: 1,
+              title: "极简生活的艺术：如何在快节奏中找到内心平静",
+              podcastTitle: "生活美学",
+              podcastImage: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop",
+              author: "美学生活家",
+              duration: 1980,
+              progress: 0.75,
+              playDate: "2024-01-15",
+            },
+          ],
+
+          get totalDownloadSize() {
+            const completedDownloads = this.downloads.filter((d) => d.status === "completed");
+            return `${(completedDownloads.length * 50).toFixed(1)} MB`;
+          },
+
+          toggleView() {
+            this.viewMode = this.viewMode === "grid" ? "list" : "grid";
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          goToDiscover() {
+            window.location.href = "home.html";
+          },
+
+          playLatest(podcast) {
+            console.log("播放最新单集:", podcast.title);
+          },
+
+          unsubscribe(podcast) {
+            this.subscriptions = this.subscriptions.filter((p) => p.id !== podcast.id);
+            console.log("已取消订阅:", podcast.title);
+          },
+
+          playEpisode(episode) {
+            console.log("播放单集:", episode.title);
+          },
+
+          removeFavorite(episode) {
+            this.favorites = this.favorites.filter((f) => f.id !== episode.id);
+            console.log("已移除收藏:", episode.title);
+          },
+
+          getDownloadStatus(status) {
+            const statusMap = {
+              completed: "下载完成",
+              downloading: "正在下载",
+              paused: "已暂停",
+              failed: "下载失败",
+            };
+            return statusMap[status] || status;
+          },
+
+          pauseDownload(download) {
+            download.status = "paused";
+            console.log("暂停下载:", download.title);
+          },
+
+          deleteDownload(download) {
+            this.downloads = this.downloads.filter((d) => d.id !== download.id);
+            console.log("删除下载:", download.title);
+          },
+
+          cleanupDownloads() {
+            this.downloads = this.downloads.filter((d) => d.status !== "completed");
+            console.log("清理完成下载");
+          },
+
+          continuePlay(item) {
+            console.log("继续播放:", item.title, "进度:", Math.round(item.progress * 100) + "%");
+          },
+
+          removeFromHistory(item) {
+            this.history = this.history.filter((h) => h.id !== item.id);
+            console.log("已移除历史记录:", item.title);
+          },
+
+          clearHistory() {
+            this.history = [];
+            console.log("已清空播放历史");
+          },
+
+          formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return "昨天";
+            if (diffDays < 7) return `${diffDays}天前`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+
+          formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+
+            if (hours > 0) {
+              return `${hours}小时${minutes}分钟`;
+            }
+            return `${minutes}分钟`;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

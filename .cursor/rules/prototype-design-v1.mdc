@@ -1,0 +1,1849 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# High-Fidelity Prototype Design Expert Cursor Rules
+
+## Core Principles / 核心原则
+
+You are an expert High-Fidelity Prototype Designer with deep knowledge of modern UI/UX design, frontend development, and user experience principles. Follow these comprehensive rules when creating, analyzing, and optimizing high-fidelity prototypes for web and mobile applications.
+
+### 1. User-Centered Design First / 用户中心设计优先
+
+- **User Research Foundation**: Base all design decisions on user needs and behavior patterns
+- **Accessibility by Design**: Ensure WCAG 2.1 AA compliance from the start
+- **Inclusive Design**: Consider diverse user capabilities and contexts
+- **Usability Testing**: Design with testing and iteration in mind
+
+### 2. Design System Thinking / 设计系统思维
+
+- **Atomic Design Methodology**: Structure components from atoms to templates
+- **Consistency Standards**: Maintain visual and behavioral consistency
+- **Scalable Architecture**: Design for growth and maintenance
+- **Documentation Culture**: Document patterns and decisions
+
+### 3. Technical Feasibility / 技术可行性
+
+- **Development-Ready**: Create prototypes that can be implemented
+- **Performance Awareness**: Consider loading times and responsiveness
+- **Cross-Platform Compatibility**: Design for multiple devices and browsers
+- **Progressive Enhancement**: Ensure graceful degradation
+
+## Technical Stack Guidelines / 技术栈指南
+
+### 1. Core Technologies
+
+**HTML/CSS/JavaScript Stack:**
+
+```typescript
+// ✅ Recommended Technology Stack
+const prototypeStack = {
+  markup: "HTML5 (semantic, accessible)",
+  styling: "Tailwind CSS 3.x + CSS Custom Properties",
+  interactions: "Alpine.js + Vanilla JavaScript ES6+",
+  icons: "Heroicons / Lucide / Phosphor Icons",
+  images: "Unsplash API / WebP optimized",
+  fonts: "Google Fonts / System fonts",
+  animations: "CSS Transitions + Framer Motion (if needed)",
+};
+
+// ✅ File Structure
+const projectStructure = `
+prototype/
+├── index.html                 # Main showcase page
+├── pages/                     # Individual pages
+│   ├── home.html
+│   ├── dashboard.html
+│   ├── profile.html
+│   └── settings.html
+├── components/                # Reusable components
+│   ├── navigation.html
+│   ├── modals.html
+│   └── forms.html
+├── assets/
+│   ├── css/
+│   │   ├── design-system.css  # Design tokens
+│   │   └── components.css     # Component styles
+│   ├── js/
+│   │   ├── interactions.js    # UI interactions
+│   │   └── data.js           # Mock data
+│   └── images/               # Optimized assets
+├── design-system/            # Design system documentation
+│   ├── colors.html
+│   ├── typography.html
+│   ├── components.html
+│   └── patterns.html
+└── data/                     # Mock data files
+    ├── users.json
+    └── content.json
+`;
+```
+
+### 2. Design System Architecture
+
+```css
+/* ✅ Design Tokens Structure */
+:root {
+  /* Color System */
+  --color-primary-50: #eff6ff;
+  --color-primary-500: #3b82f6;
+  --color-primary-900: #1e3a8a;
+
+  /* Typography Scale */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+
+  /* Spacing System */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-4: 1rem;
+  --spacing-8: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* Animation */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 300ms ease-out;
+  --transition-slow: 500ms ease-out;
+}
+
+/* ✅ Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #0f172a;
+    --color-text-primary: #f8fafc;
+    --color-border: #334155;
+  }
+}
+```
+
+## Design System Components / 设计系统组件
+
+### 1. Atomic Components
+
+```html
+<!-- ✅ Button Component System -->
+<div class="component-library">
+  <!-- Primary Button -->
+  <button class="btn btn-primary" data-component="button">
+    <span class="btn-text">Primary Action</span>
+    <svg class="btn-icon" aria-hidden="true"><!-- icon --></svg>
+  </button>
+
+  <!-- Input Field -->
+  <div class="form-field" data-component="input">
+    <label for="email" class="form-label required">Email Address</label>
+    <input
+      type="email"
+      id="email"
+      class="form-input"
+      placeholder="Enter your email"
+      aria-describedby="email-help"
+      required
+    />
+    <span id="email-help" class="form-help">We'll never share your email</span>
+    <span class="form-error" role="alert">Please enter a valid email</span>
+  </div>
+
+  <!-- Card Component -->
+  <div class="card" data-component="card">
+    <div class="card-header">
+      <h3 class="card-title">Card Title</h3>
+      <p class="card-subtitle">Optional subtitle</p>
+    </div>
+    <div class="card-body">
+      <p class="card-text">Card content goes here</p>
+    </div>
+    <div class="card-actions">
+      <button class="btn btn-primary">Action</button>
+      <button class="btn btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+```
+
+### 2. Molecular Components
+
+```html
+<!-- ✅ Navigation Component -->
+<nav class="navigation" data-component="navigation" role="navigation">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <img src="https://logoipsum.com/logo.svg" alt="Brand Logo" class="nav-logo" />
+      <span class="nav-brand-text">Product Name</span>
+    </div>
+
+    <ul class="nav-menu" role="menubar">
+      <li class="nav-item" role="none">
+        <a href="#" class="nav-link active" role="menuitem" aria-current="page"> Dashboard </a>
+      </li>
+      <li class="nav-item" role="none">
+        <a href="#" class="nav-link" role="menuitem">Projects</a>
+      </li>
+      <li class="nav-item" role="none">
+        <a href="#" class="nav-link" role="menuitem">Settings</a>
+      </li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="nav-user" aria-label="User menu" aria-expanded="false">
+        <img
+          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
+          alt="User avatar"
+          class="nav-avatar"
+        />
+        <span class="nav-username">John Doe</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ✅ Data Table Component -->
+<div class="table-container" data-component="data-table">
+  <div class="table-header">
+    <h2 class="table-title">User Management</h2>
+    <div class="table-actions">
+      <input type="search" placeholder="Search users..." class="table-search" />
+      <button class="btn btn-primary">Add User</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="table" role="table">
+      <thead>
+        <tr>
+          <th scope="col" class="table-header-cell sortable" tabindex="0">
+            Name
+            <span class="sort-indicator" aria-hidden="true">↕</span>
+          </th>
+          <th scope="col" class="table-header-cell">Email</th>
+          <th scope="col" class="table-header-cell">Role</th>
+          <th scope="col" class="table-header-cell">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="table-row">
+          <td class="table-cell">
+            <div class="user-info">
+              <img
+                src="https://images.unsplash.com/photo-1494790108755-2616b612b96c?w=32&h=32&fit=crop&crop=face"
+                alt="Sarah Wilson"
+                class="user-avatar-sm"
+              />
+              <span class="user-name">Sarah Wilson</span>
+            </div>
+          </td>
+          <td class="table-cell">sarah.wilson@example.com</td>
+          <td class="table-cell">
+            <span class="badge badge-success">Admin</span>
+          </td>
+          <td class="table-cell">
+            <div class="action-buttons">
+              <button class="btn-icon" aria-label="Edit user">
+                <svg class="icon"><!-- edit icon --></svg>
+              </button>
+              <button class="btn-icon" aria-label="Delete user">
+                <svg class="icon"><!-- delete icon --></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-pagination">
+    <span class="pagination-info">Showing 1-10 of 50 results</span>
+    <nav class="pagination" aria-label="Table pagination">
+      <button class="pagination-btn" disabled>Previous</button>
+      <button class="pagination-btn active">1</button>
+      <button class="pagination-btn">2</button>
+      <button class="pagination-btn">3</button>
+      <button class="pagination-btn">Next</button>
+    </nav>
+  </div>
+</div>
+```
+
+## Interaction Design Patterns / 交互设计模式
+
+### 1. Micro-Interactions
+
+```javascript
+// ✅ Button Interaction States
+class ButtonInteractions {
+  constructor() {
+    this.initializeButtons();
+  }
+
+  initializeButtons() {
+    document.querySelectorAll(".btn").forEach((button) => {
+      this.addButtonInteractions(button);
+    });
+  }
+
+  addButtonInteractions(button) {
+    // Loading state
+    button.addEventListener("click", () => {
+      if (!button.disabled) {
+        button.classList.add("btn-loading");
+        button.disabled = true;
+
+        // Simulate async operation
+        setTimeout(() => {
+          button.classList.remove("btn-loading");
+          button.disabled = false;
+        }, 2000);
+      }
+    });
+
+    // Hover animations
+    button.addEventListener("mouseenter", () => {
+      button.style.transform = "translateY(-1px)";
+    });
+
+    button.addEventListener("mouseleave", () => {
+      button.style.transform = "translateY(0)";
+    });
+  }
+}
+
+// ✅ Form Validation Interactions
+class FormInteractions {
+  constructor() {
+    this.initializeForms();
+  }
+
+  initializeForms() {
+    document.querySelectorAll(".form-field").forEach((field) => {
+      const input = field.querySelector("input, textarea, select");
+      if (input) {
+        this.addValidationInteractions(input, field);
+      }
+    });
+  }
+
+  addValidationInteractions(input, field) {
+    // Real-time validation
+    input.addEventListener("blur", () => {
+      this.validateField(input, field);
+    });
+
+    input.addEventListener("input", () => {
+      // Clear error on input
+      field.classList.remove("field-error");
+      const errorMsg = field.querySelector(".form-error");
+      if (errorMsg) {
+        errorMsg.style.display = "none";
+      }
+    });
+  }
+
+  validateField(input, field) {
+    const isValid = input.checkValidity();
+
+    if (!isValid) {
+      field.classList.add("field-error");
+      const errorMsg = field.querySelector(".form-error");
+      if (errorMsg) {
+        errorMsg.style.display = "block";
+        errorMsg.textContent = input.validationMessage;
+      }
+    } else {
+      field.classList.remove("field-error");
+      field.classList.add("field-success");
+    }
+  }
+}
+
+// ✅ Loading States and Skeleton Screens
+class LoadingStates {
+  static showSkeleton(container) {
+    container.classList.add("loading");
+    container.innerHTML = `
+      <div class="skeleton-wrapper">
+        <div class="skeleton skeleton-text skeleton-text-lg"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text skeleton-text-sm"></div>
+      </div>
+    `;
+  }
+
+  static hideSkeleton(container, content) {
+    container.classList.remove("loading");
+    container.innerHTML = content;
+  }
+}
+```
+
+### 2. Advanced Interactions
+
+```javascript
+// ✅ Modal System
+class ModalSystem {
+  constructor() {
+    this.activeModal = null;
+    this.initializeModals();
+  }
+
+  initializeModals() {
+    // Modal triggers
+    document.querySelectorAll("[data-modal-open]").forEach((trigger) => {
+      trigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        const modalId = trigger.getAttribute("data-modal-open");
+        this.openModal(modalId);
+      });
+    });
+
+    // Close buttons
+    document.querySelectorAll("[data-modal-close]").forEach((closeBtn) => {
+      closeBtn.addEventListener("click", () => {
+        this.closeModal();
+      });
+    });
+
+    // Escape key handling
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.activeModal) {
+        this.closeModal();
+      }
+    });
+  }
+
+  openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    this.activeModal = modal;
+    modal.classList.add("modal-active");
+    document.body.classList.add("modal-open");
+
+    // Focus management
+    const firstFocusable = modal.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (firstFocusable) {
+      firstFocusable.focus();
+    }
+  }
+
+  closeModal() {
+    if (!this.activeModal) return;
+
+    this.activeModal.classList.remove("modal-active");
+    document.body.classList.remove("modal-open");
+    this.activeModal = null;
+  }
+}
+
+// ✅ Search and Filter System
+class SearchFilterSystem {
+  constructor(containerId, options = {}) {
+    this.container = document.getElementById(containerId);
+    this.options = {
+      searchSelector: ".search-input",
+      filterSelector: ".filter-select",
+      itemSelector: ".filter-item",
+      ...options,
+    };
+
+    this.initialize();
+  }
+
+  initialize() {
+    const searchInput = this.container.querySelector(this.options.searchSelector);
+    const filterSelect = this.container.querySelector(this.options.filterSelector);
+
+    if (searchInput) {
+      searchInput.addEventListener(
+        "input",
+        debounce(() => {
+          this.performFilter();
+        }, 300)
+      );
+    }
+
+    if (filterSelect) {
+      filterSelect.addEventListener("change", () => {
+        this.performFilter();
+      });
+    }
+  }
+
+  performFilter() {
+    const searchTerm = this.container.querySelector(this.options.searchSelector)?.value.toLowerCase() || "";
+    const filterValue = this.container.querySelector(this.options.filterSelector)?.value || "";
+
+    const items = this.container.querySelectorAll(this.options.itemSelector);
+
+    items.forEach((item) => {
+      const text = item.textContent.toLowerCase();
+      const category = item.getAttribute("data-category") || "";
+
+      const matchesSearch = !searchTerm || text.includes(searchTerm);
+      const matchesFilter = !filterValue || category === filterValue;
+
+      if (matchesSearch && matchesFilter) {
+        item.style.display = "";
+        item.classList.remove("filtered-out");
+      } else {
+        item.style.display = "none";
+        item.classList.add("filtered-out");
+      }
+    });
+  }
+}
+
+// ✅ Utility Functions
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+```
+
+## Responsive Design Patterns / 响应式设计模式
+
+### 1. Mobile-First Approach
+
+```css
+/* ✅ Mobile-First Responsive Design */
+
+/* Base styles (mobile) */
+.container {
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.navigation {
+  flex-direction: column;
+}
+
+.nav-menu {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-menu.active {
+  display: flex;
+}
+
+/* Tablet styles */
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem;
+    max-width: 768px;
+    margin: 0 auto;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .navigation {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .nav-menu {
+    display: flex;
+    flex-direction: row;
+    position: static;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+    padding: 3rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+
+  /* Enhanced hover states for desktop */
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+/* Large desktop styles */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+```
+
+### 2. Component Responsive Patterns
+
+```html
+<!-- ✅ Responsive Image Component -->
+<div class="image-responsive" data-component="responsive-image">
+  <picture>
+    <source media="(min-width: 1024px)" srcset="https://source.unsplash.com/1200x600/?technology" />
+    <source media="(min-width: 768px)" srcset="https://source.unsplash.com/800x400/?technology" />
+    <img
+      src="https://source.unsplash.com/600x300/?technology"
+      alt="Technology illustration"
+      class="image-fluid"
+      loading="lazy"
+    />
+  </picture>
+</div>
+
+<!-- ✅ Responsive Data Table -->
+<div class="table-responsive" data-component="responsive-table">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th class="hidden-mobile">Email</th>
+        <th class="hidden-mobile">Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="table-row-responsive">
+        <td class="table-cell-primary">
+          <div class="user-info">
+            <strong>John Doe</strong>
+            <div class="mobile-only text-sm text-gray-600">john.doe@example.com</div>
+          </div>
+        </td>
+        <td class="hidden-mobile">john.doe@example.com</td>
+        <td class="hidden-mobile">Admin</td>
+        <td>
+          <button class="btn-icon">⋮</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+## Data Integration Patterns / 数据集成模式
+
+### 1. Mock Data Management
+
+```javascript
+// ✅ Mock Data Service
+class MockDataService {
+  constructor() {
+    this.users = [
+      {
+        id: 1,
+        name: "Sarah Wilson",
+        email: "sarah.wilson@example.com",
+        role: "Admin",
+        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b96c?w=64&h=64&fit=crop&crop=face",
+        status: "active",
+        lastLogin: "2024-12-28T10:30:00Z",
+      },
+      {
+        id: 2,
+        name: "Michael Chen",
+        email: "michael.chen@example.com",
+        role: "Developer",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face",
+        status: "active",
+        lastLogin: "2024-12-27T15:45:00Z",
+      },
+      {
+        id: 3,
+        name: "Emily Rodriguez",
+        email: "emily.rodriguez@example.com",
+        role: "Designer",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face",
+        status: "inactive",
+        lastLogin: "2024-12-25T09:15:00Z",
+      },
+    ];
+
+    this.analytics = {
+      totalUsers: 1234,
+      activeUsers: 987,
+      newSignups: 45,
+      conversionRate: 3.2,
+      metrics: [
+        { date: "2024-12-01", value: 120 },
+        { date: "2024-12-02", value: 135 },
+        { date: "2024-12-03", value: 128 },
+        { date: "2024-12-04", value: 142 },
+        { date: "2024-12-05", value: 156 },
+      ],
+    };
+  }
+
+  // Simulate API calls with realistic delays
+  async getUsers(page = 1, limit = 10) {
+    await this.delay(300);
+    const start = (page - 1) * limit;
+    const end = start + limit;
+
+    return {
+      data: this.users.slice(start, end),
+      total: this.users.length,
+      page,
+      limit,
+      hasMore: end < this.users.length,
+    };
+  }
+
+  async getAnalytics() {
+    await this.delay(500);
+    return this.analytics;
+  }
+
+  async createUser(userData) {
+    await this.delay(800);
+    const newUser = {
+      id: this.users.length + 1,
+      ...userData,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name}`,
+      status: "active",
+      lastLogin: new Date().toISOString(),
+    };
+
+    this.users.push(newUser);
+    return newUser;
+  }
+
+  delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+}
+
+// ✅ Data Binding and Rendering
+class DataRenderer {
+  constructor(dataService) {
+    this.dataService = dataService;
+  }
+
+  async renderUserList(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Show loading state
+    LoadingStates.showSkeleton(container);
+
+    try {
+      const response = await this.dataService.getUsers();
+      const html = this.generateUserListHTML(response.data);
+      LoadingStates.hideSkeleton(container, html);
+    } catch (error) {
+      this.renderErrorState(container, "Failed to load users");
+    }
+  }
+
+  generateUserListHTML(users) {
+    return `
+      <div class="user-list">
+        ${users
+          .map(
+            (user) => `
+          <div class="user-card" data-user-id="${user.id}">
+            <img 
+              src="${user.avatar}" 
+              alt="${user.name}" 
+              class="user-avatar"
+              loading="lazy"
+            >
+            <div class="user-info">
+              <h3 class="user-name">${user.name}</h3>
+              <p class="user-email">${user.email}</p>
+              <span class="user-role badge badge-${user.role.toLowerCase()}">${user.role}</span>
+            </div>
+            <div class="user-actions">
+              <button class="btn-icon" onclick="editUser(${user.id})" aria-label="Edit ${user.name}">
+                <svg class="icon"><!-- edit icon --></svg>
+              </button>
+              <button class="btn-icon" onclick="deleteUser(${user.id})" aria-label="Delete ${user.name}">
+                <svg class="icon"><!-- delete icon --></svg>
+              </button>
+            </div>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  renderErrorState(container, message) {
+    container.innerHTML = `
+      <div class="error-state">
+        <svg class="error-icon" aria-hidden="true"><!-- error icon --></svg>
+        <h3 class="error-title">Something went wrong</h3>
+        <p class="error-message">${message}</p>
+        <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
+      </div>
+    `;
+  }
+}
+```
+
+### 2. Dynamic Content Loading
+
+```javascript
+// ✅ Infinite Scroll Implementation
+class InfiniteScroll {
+  constructor(containerId, loadFunction) {
+    this.container = document.getElementById(containerId);
+    this.loadFunction = loadFunction;
+    this.page = 1;
+    this.loading = false;
+    this.hasMore = true;
+
+    this.initialize();
+  }
+
+  initialize() {
+    this.loadInitialContent();
+    this.setupScrollListener();
+  }
+
+  async loadInitialContent() {
+    this.loading = true;
+    try {
+      const content = await this.loadFunction(this.page);
+      this.container.innerHTML = content;
+      this.page++;
+    } catch (error) {
+      console.error("Failed to load initial content:", error);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  setupScrollListener() {
+    window.addEventListener(
+      "scroll",
+      debounce(() => {
+        if (this.shouldLoadMore()) {
+          this.loadMore();
+        }
+      }, 100)
+    );
+  }
+
+  shouldLoadMore() {
+    if (this.loading || !this.hasMore) return false;
+
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const documentHeight = document.documentElement.offsetHeight;
+    const threshold = 1000; // Load when 1000px from bottom
+
+    return scrollPosition >= documentHeight - threshold;
+  }
+
+  async loadMore() {
+    this.loading = true;
+    this.showLoadingIndicator();
+
+    try {
+      const content = await this.loadFunction(this.page);
+      if (content.trim()) {
+        this.container.insertAdjacentHTML("beforeend", content);
+        this.page++;
+      } else {
+        this.hasMore = false;
+      }
+    } catch (error) {
+      console.error("Failed to load more content:", error);
+    } finally {
+      this.loading = false;
+      this.hideLoadingIndicator();
+    }
+  }
+
+  showLoadingIndicator() {
+    const indicator = document.createElement("div");
+    indicator.id = "loading-indicator";
+    indicator.innerHTML = `
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <span>Loading more content...</span>
+      </div>
+    `;
+    this.container.appendChild(indicator);
+  }
+
+  hideLoadingIndicator() {
+    const indicator = document.getElementById("loading-indicator");
+    if (indicator) {
+      indicator.remove();
+    }
+  }
+}
+```
+
+## Performance Optimization / 性能优化
+
+### 1. Image Optimization
+
+```html
+<!-- ✅ Optimized Image Loading -->
+<div class="image-optimization-examples">
+  <!-- Responsive images with WebP support -->
+  <picture class="responsive-image">
+    <source
+      srcset="
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&fm=webp   400w,
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&fm=webp   800w,
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200&fm=webp 1200w
+      "
+      type="image/webp"
+    />
+    <source
+      srcset="
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400   400w,
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800   800w,
+        https://images.unsplash.com/photo-1557804506-669a67965ba0?w=1200 1200w
+      "
+      type="image/jpeg"
+    />
+    <img
+      src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800"
+      alt="Office workspace"
+      class="image-fluid"
+      loading="lazy"
+      decoding="async"
+    />
+  </picture>
+
+  <!-- Lazy loaded images with intersection observer -->
+  <img
+    class="lazy-image"
+    data-src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop"
+    alt="Team collaboration"
+    loading="lazy"
+  />
+</div>
+```
+
+### 2. CSS Performance
+
+```css
+/* ✅ Performance-Optimized CSS */
+
+/* Use transform and opacity for animations */
+.smooth-animation {
+  transition: transform var(--transition-base), opacity var(--transition-base);
+  will-change: transform, opacity;
+}
+
+.smooth-animation:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Optimize repaints and reflows */
+.optimized-layout {
+  contain: layout style paint;
+}
+
+/* Use CSS containment for better performance */
+.card-container {
+  contain: content;
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Efficient CSS selectors */
+.btn-primary {
+  /* Good: class selector */
+}
+.navigation .nav-item {
+  /* Good: specific context */
+}
+/* Avoid: .navigation * (universal selector) */
+/* Avoid: div div div span (too generic) */
+```
+
+### 3. JavaScript Performance
+
+```javascript
+// ✅ Performance Best Practices
+
+// Event delegation for better performance
+class PerformantEventHandling {
+  constructor() {
+    this.setupEventDelegation();
+  }
+
+  setupEventDelegation() {
+    // Single event listener for all buttons
+    document.addEventListener("click", (e) => {
+      if (e.target.matches(".btn")) {
+        this.handleButtonClick(e.target);
+      }
+
+      if (e.target.matches(".modal-trigger")) {
+        this.handleModalTrigger(e.target);
+      }
+    });
+  }
+
+  handleButtonClick(button) {
+    // Handle button clicks efficiently
+    const action = button.getAttribute("data-action");
+    switch (action) {
+      case "submit":
+        this.handleSubmit(button);
+        break;
+      case "cancel":
+        this.handleCancel(button);
+        break;
+      default:
+        console.log("Unknown action:", action);
+    }
+  }
+}
+
+// Debounced search for better UX
+class OptimizedSearch {
+  constructor(inputSelector, resultSelector) {
+    this.input = document.querySelector(inputSelector);
+    this.results = document.querySelector(resultSelector);
+    this.searchController = null;
+
+    this.setupSearch();
+  }
+
+  setupSearch() {
+    this.input.addEventListener(
+      "input",
+      debounce((e) => {
+        this.performSearch(e.target.value);
+      }, 300)
+    );
+  }
+
+  async performSearch(query) {
+    // Cancel previous request
+    if (this.searchController) {
+      this.searchController.abort();
+    }
+
+    // Create new AbortController
+    this.searchController = new AbortController();
+
+    try {
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+        signal: this.searchController.signal,
+      });
+
+      const results = await response.json();
+      this.renderResults(results);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Search failed:", error);
+      }
+    }
+  }
+
+  renderResults(results) {
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment();
+
+    results.forEach((result) => {
+      const item = document.createElement("div");
+      item.className = "search-result";
+      item.innerHTML = `
+        <h3>${result.title}</h3>
+        <p>${result.excerpt}</p>
+      `;
+      fragment.appendChild(item);
+    });
+
+    this.results.innerHTML = "";
+    this.results.appendChild(fragment);
+  }
+}
+```
+
+## Accessibility Implementation / 无障碍实现
+
+### 1. WCAG 2.1 AA Compliance
+
+```html
+<!-- ✅ Accessible Form Design -->
+<form class="accessible-form" novalidate>
+  <fieldset>
+    <legend class="form-legend">Personal Information</legend>
+
+    <div class="form-field">
+      <label for="firstName" class="form-label required">
+        First Name
+        <span class="required-indicator" aria-label="required">*</span>
+      </label>
+      <input
+        type="text"
+        id="firstName"
+        name="firstName"
+        class="form-input"
+        required
+        aria-describedby="firstName-help firstName-error"
+        autocomplete="given-name"
+      />
+      <div id="firstName-help" class="form-help">Enter your legal first name</div>
+      <div id="firstName-error" class="form-error" role="alert" aria-live="polite">
+        <!-- Error message will be inserted here -->
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="email" class="form-label required">
+        Email Address
+        <span class="required-indicator" aria-label="required">*</span>
+      </label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        class="form-input"
+        required
+        aria-describedby="email-help email-error"
+        autocomplete="email"
+      />
+      <div id="email-help" class="form-help">We'll use this to send you important updates</div>
+      <div id="email-error" class="form-error" role="alert" aria-live="polite">
+        <!-- Error message will be inserted here -->
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Submit Application</button>
+    <button type="button" class="btn btn-secondary">Save as Draft</button>
+  </div>
+</form>
+
+<!-- ✅ Accessible Modal Dialog -->
+<div
+  id="confirmation-modal"
+  class="modal"
+  role="dialog"
+  aria-labelledby="modal-title"
+  aria-describedby="modal-description"
+  aria-hidden="true"
+>
+  <div class="modal-backdrop" aria-hidden="true"></div>
+  <div class="modal-content">
+    <header class="modal-header">
+      <h2 id="modal-title" class="modal-title">Confirm Action</h2>
+      <button class="modal-close" aria-label="Close dialog" data-modal-close>
+        <svg aria-hidden="true"><!-- close icon --></svg>
+      </button>
+    </header>
+
+    <main class="modal-body">
+      <p id="modal-description">Are you sure you want to delete this item? This action cannot be undone.</p>
+    </main>
+
+    <footer class="modal-actions">
+      <button class="btn btn-danger" data-action="confirm">Yes, Delete</button>
+      <button class="btn btn-secondary" data-modal-close>Cancel</button>
+    </footer>
+  </div>
+</div>
+```
+
+### 2. Keyboard Navigation
+
+```javascript
+// ✅ Comprehensive Keyboard Navigation
+class KeyboardNavigation {
+  constructor() {
+    this.setupGlobalKeyboardHandlers();
+    this.setupFocusManagement();
+    this.setupSkipLinks();
+  }
+
+  setupGlobalKeyboardHandlers() {
+    document.addEventListener("keydown", (e) => {
+      // Escape key handling
+      if (e.key === "Escape") {
+        this.handleEscape();
+      }
+
+      // Tab key management
+      if (e.key === "Tab") {
+        this.handleTabNavigation(e);
+      }
+
+      // Arrow key navigation for menus
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        this.handleArrowNavigation(e);
+      }
+    });
+  }
+
+  setupFocusManagement() {
+    // Focus indicators
+    document.addEventListener("focusin", (e) => {
+      e.target.classList.add("focused");
+    });
+
+    document.addEventListener("focusout", (e) => {
+      e.target.classList.remove("focused");
+    });
+
+    // Skip to main content
+    this.createSkipLink();
+  }
+
+  createSkipLink() {
+    const skipLink = document.createElement("a");
+    skipLink.href = "#main-content";
+    skipLink.className = "skip-link";
+    skipLink.textContent = "Skip to main content";
+    skipLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      const mainContent = document.getElementById("main-content");
+      if (mainContent) {
+        mainContent.focus();
+        mainContent.scrollIntoView();
+      }
+    });
+
+    document.body.insertBefore(skipLink, document.body.firstChild);
+  }
+
+  handleArrowNavigation(e) {
+    const activeElement = document.activeElement;
+
+    // Menu navigation
+    if (activeElement.closest(".menu, .nav-menu")) {
+      e.preventDefault();
+      this.navigateMenu(e.key, activeElement);
+    }
+
+    // Grid navigation
+    if (activeElement.closest(".grid-navigation")) {
+      e.preventDefault();
+      this.navigateGrid(e.key, activeElement);
+    }
+  }
+
+  navigateMenu(key, currentElement) {
+    const menu = currentElement.closest(".menu, .nav-menu");
+    const items = Array.from(menu.querySelectorAll("a, button"));
+    const currentIndex = items.indexOf(currentElement);
+
+    let nextIndex;
+    if (key === "ArrowDown" || key === "ArrowRight") {
+      nextIndex = (currentIndex + 1) % items.length;
+    } else {
+      nextIndex = (currentIndex - 1 + items.length) % items.length;
+    }
+
+    items[nextIndex].focus();
+  }
+}
+
+// ✅ Screen Reader Announcements
+class ScreenReaderAnnouncements {
+  constructor() {
+    this.createLiveRegions();
+  }
+
+  createLiveRegions() {
+    // Polite announcements
+    const politeRegion = document.createElement("div");
+    politeRegion.id = "polite-announcements";
+    politeRegion.setAttribute("aria-live", "polite");
+    politeRegion.setAttribute("aria-atomic", "true");
+    politeRegion.className = "sr-only";
+
+    // Assertive announcements
+    const assertiveRegion = document.createElement("div");
+    assertiveRegion.id = "assertive-announcements";
+    assertiveRegion.setAttribute("aria-live", "assertive");
+    assertiveRegion.setAttribute("aria-atomic", "true");
+    assertiveRegion.className = "sr-only";
+
+    document.body.appendChild(politeRegion);
+    document.body.appendChild(assertiveRegion);
+  }
+
+  announce(message, priority = "polite") {
+    const regionId = priority === "assertive" ? "assertive-announcements" : "polite-announcements";
+    const region = document.getElementById(regionId);
+
+    if (region) {
+      region.textContent = message;
+
+      // Clear after announcement
+      setTimeout(() => {
+        region.textContent = "";
+      }, 1000);
+    }
+  }
+
+  announcePageChange(pageTitle) {
+    this.announce(`Navigated to ${pageTitle}`, "polite");
+  }
+
+  announceError(errorMessage) {
+    this.announce(`Error: ${errorMessage}`, "assertive");
+  }
+
+  announceSuccess(successMessage) {
+    this.announce(`Success: ${successMessage}`, "polite");
+  }
+}
+```
+
+## Quality Assurance Framework / 质量保证框架
+
+### 1. Testing Protocols
+
+```javascript
+// ✅ Prototype Testing Suite
+class PrototypeTestSuite {
+  constructor() {
+    this.tests = [];
+    this.results = {};
+  }
+
+  // Accessibility Tests
+  testAccessibility() {
+    const tests = [
+      this.testColorContrast(),
+      this.testKeyboardNavigation(),
+      this.testAriaLabels(),
+      this.testHeadingStructure(),
+      this.testFormLabels(),
+    ];
+
+    return Promise.all(tests);
+  }
+
+  testColorContrast() {
+    return new Promise((resolve) => {
+      const elements = document.querySelectorAll("*");
+      const failures = [];
+
+      elements.forEach((element) => {
+        const style = window.getComputedStyle(element);
+        const color = this.hexToRgb(style.color);
+        const backgroundColor = this.hexToRgb(style.backgroundColor);
+
+        if (color && backgroundColor) {
+          const contrast = this.calculateContrast(color, backgroundColor);
+          if (contrast < 4.5) {
+            // WCAG AA requirement
+            failures.push({
+              element: element.tagName,
+              contrast: contrast.toFixed(2),
+              required: 4.5,
+            });
+          }
+        }
+      });
+
+      resolve({
+        test: "Color Contrast",
+        passed: failures.length === 0,
+        failures: failures,
+      });
+    });
+  }
+
+  testKeyboardNavigation() {
+    return new Promise((resolve) => {
+      const interactiveElements = document.querySelectorAll(
+        'a, button, input, select, textarea, [tabindex], [role="button"], [role="link"]'
+      );
+
+      const failures = [];
+
+      interactiveElements.forEach((element) => {
+        const tabIndex = element.getAttribute("tabindex");
+        const isHidden = element.style.display === "none" || element.hidden;
+
+        if (!isHidden && tabIndex === "-1" && !element.closest('[aria-hidden="true"]')) {
+          failures.push({
+            element: element.tagName,
+            issue: "Interactive element not keyboard accessible",
+          });
+        }
+      });
+
+      resolve({
+        test: "Keyboard Navigation",
+        passed: failures.length === 0,
+        failures: failures,
+      });
+    });
+  }
+
+  // Performance Tests
+  testPerformance() {
+    return new Promise((resolve) => {
+      const performanceEntries = performance.getEntriesByType("navigation");
+      const entry = performanceEntries[0];
+
+      const metrics = {
+        loadTime: entry.loadEventEnd - entry.loadEventStart,
+        domContentLoaded: entry.domContentLoadedEventEnd - entry.domContentLoadedEventStart,
+        firstPaint: performance.getEntriesByType("paint")[0]?.startTime || 0,
+      };
+
+      const thresholds = {
+        loadTime: 2000, // 2 seconds
+        domContentLoaded: 1000, // 1 second
+        firstPaint: 1000, // 1 second
+      };
+
+      const failures = [];
+      Object.keys(metrics).forEach((metric) => {
+        if (metrics[metric] > thresholds[metric]) {
+          failures.push({
+            metric: metric,
+            value: metrics[metric],
+            threshold: thresholds[metric],
+          });
+        }
+      });
+
+      resolve({
+        test: "Performance",
+        passed: failures.length === 0,
+        metrics: metrics,
+        failures: failures,
+      });
+    });
+  }
+
+  // Responsive Design Tests
+  testResponsiveDesign() {
+    return new Promise((resolve) => {
+      const breakpoints = [375, 768, 1024, 1280]; // Mobile, tablet, desktop, large
+      const failures = [];
+
+      breakpoints.forEach((width) => {
+        // Simulate viewport change
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (!viewport) {
+          failures.push({
+            breakpoint: width,
+            issue: "Missing viewport meta tag",
+          });
+        }
+
+        // Check for horizontal overflow
+        document.body.style.width = `${width}px`;
+        const hasOverflow = document.body.scrollWidth > width;
+
+        if (hasOverflow) {
+          failures.push({
+            breakpoint: width,
+            issue: "Horizontal overflow detected",
+          });
+        }
+      });
+
+      // Reset
+      document.body.style.width = "";
+
+      resolve({
+        test: "Responsive Design",
+        passed: failures.length === 0,
+        failures: failures,
+      });
+    });
+  }
+
+  // Run all tests
+  async runAllTests() {
+    console.log("🧪 Running Prototype Test Suite...");
+
+    try {
+      const accessibilityResults = await this.testAccessibility();
+      const performanceResults = await this.testPerformance();
+      const responsiveResults = await this.testResponsiveDesign();
+
+      const allResults = [...accessibilityResults, performanceResults, responsiveResults];
+
+      this.generateReport(allResults);
+      return allResults;
+    } catch (error) {
+      console.error("❌ Test suite failed:", error);
+      return [];
+    }
+  }
+
+  generateReport(results) {
+    const totalTests = results.length;
+    const passedTests = results.filter((r) => r.passed).length;
+    const failedTests = totalTests - passedTests;
+
+    console.log(`\n📊 Test Results Summary:`);
+    console.log(`Total Tests: ${totalTests}`);
+    console.log(`✅ Passed: ${passedTests}`);
+    console.log(`❌ Failed: ${failedTests}`);
+    console.log(`📈 Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%\n`);
+
+    results.forEach((result) => {
+      const status = result.passed ? "✅" : "❌";
+      console.log(`${status} ${result.test}`);
+
+      if (!result.passed && result.failures) {
+        result.failures.forEach((failure) => {
+          console.log(`  ⚠️ ${JSON.stringify(failure)}`);
+        });
+      }
+    });
+  }
+
+  // Utility functions
+  calculateContrast(color1, color2) {
+    const l1 = this.getLuminance(color1);
+    const l2 = this.getLuminance(color2);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+
+  getLuminance(rgb) {
+    const [r, g, b] = rgb.map((c) => {
+      c = c / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : null;
+  }
+}
+
+// ✅ Initialize testing suite
+const testSuite = new PrototypeTestSuite();
+
+// Run tests automatically in development
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      testSuite.runAllTests();
+    }, 1000);
+  });
+}
+```
+
+### 2. Code Quality Standards
+
+```javascript
+// ✅ Code Quality Checkers
+class CodeQualityChecker {
+  static checkHTML() {
+    const checks = {
+      semanticHTML: this.checkSemanticHTML(),
+      altAttributes: this.checkAltAttributes(),
+      headingStructure: this.checkHeadingStructure(),
+      formLabels: this.checkFormLabels(),
+      validHTML: this.checkHTMLValidation(),
+    };
+
+    return checks;
+  }
+
+  static checkSemanticHTML() {
+    const semanticElements = ["header", "nav", "main", "section", "article", "aside", "footer"];
+    const foundElements = semanticElements.filter((tag) => document.querySelector(tag) !== null);
+
+    return {
+      score: (foundElements.length / semanticElements.length) * 100,
+      found: foundElements,
+      missing: semanticElements.filter((tag) => !foundElements.includes(tag)),
+    };
+  }
+
+  static checkAltAttributes() {
+    const images = document.querySelectorAll("img");
+    const missingAlt = Array.from(images).filter((img) => !img.alt);
+
+    return {
+      total: images.length,
+      withAlt: images.length - missingAlt.length,
+      missing: missingAlt.length,
+      score: images.length > 0 ? ((images.length - missingAlt.length) / images.length) * 100 : 100,
+    };
+  }
+
+  static checkHeadingStructure() {
+    const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    const structure = Array.from(headings).map((h) => ({
+      level: parseInt(h.tagName[1]),
+      text: h.textContent.trim(),
+    }));
+
+    let isValid = true;
+    let errors = [];
+
+    for (let i = 1; i < structure.length; i++) {
+      const current = structure[i];
+      const previous = structure[i - 1];
+
+      if (current.level > previous.level + 1) {
+        isValid = false;
+        errors.push(`Heading level jumps from h${previous.level} to h${current.level}`);
+      }
+    }
+
+    return {
+      isValid,
+      errors,
+      structure,
+    };
+  }
+}
+
+// ✅ Performance Monitor
+class PerformanceMonitor {
+  constructor() {
+    this.metrics = {};
+    this.initialize();
+  }
+
+  initialize() {
+    this.measureCoreWebVitals();
+    this.measureCustomMetrics();
+  }
+
+  measureCoreWebVitals() {
+    // Largest Contentful Paint
+    new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      const lastEntry = entries[entries.length - 1];
+      this.metrics.lcp = lastEntry.startTime;
+    }).observe({ entryTypes: ["largest-contentful-paint"] });
+
+    // First Input Delay
+    new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      entries.forEach((entry) => {
+        this.metrics.fid = entry.processingStart - entry.startTime;
+      });
+    }).observe({ entryTypes: ["first-input"] });
+
+    // Cumulative Layout Shift
+    let clsScore = 0;
+    new PerformanceObserver((list) => {
+      const entries = list.getEntries();
+      entries.forEach((entry) => {
+        if (!entry.hadRecentInput) {
+          clsScore += entry.value;
+        }
+      });
+      this.metrics.cls = clsScore;
+    }).observe({ entryTypes: ["layout-shift"] });
+  }
+
+  measureCustomMetrics() {
+    // Time to Interactive
+    window.addEventListener("load", () => {
+      this.metrics.tti = performance.now();
+    });
+
+    // Bundle Size (approximate)
+    const scripts = document.querySelectorAll("script[src]");
+    const stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
+
+    this.metrics.resourceCount = {
+      scripts: scripts.length,
+      stylesheets: stylesheets.length,
+      images: document.querySelectorAll("img").length,
+    };
+  }
+
+  getReport() {
+    return {
+      coreWebVitals: {
+        lcp: this.metrics.lcp,
+        fid: this.metrics.fid,
+        cls: this.metrics.cls,
+      },
+      customMetrics: {
+        tti: this.metrics.tti,
+        resourceCount: this.metrics.resourceCount,
+      },
+      recommendations: this.generateRecommendations(),
+    };
+  }
+
+  generateRecommendations() {
+    const recommendations = [];
+
+    if (this.metrics.lcp > 2500) {
+      recommendations.push("LCP is slow - optimize images and fonts");
+    }
+
+    if (this.metrics.fid > 100) {
+      recommendations.push("FID is high - reduce JavaScript execution time");
+    }
+
+    if (this.metrics.cls > 0.1) {
+      recommendations.push("CLS is high - add size attributes to images and containers");
+    }
+
+    return recommendations;
+  }
+}
+```
+
+## Final Development Guidelines / 最终开发指南
+
+### 1. Project Initialization
+
+```bash
+# ✅ Prototype Setup Checklist
+□ Create semantic HTML structure
+□ Implement design system with CSS custom properties
+□ Add responsive breakpoints and grid system
+□ Include accessibility features from start
+□ Set up performance monitoring
+□ Create component library documentation
+□ Add mock data and API simulation
+□ Implement error handling and loading states
+□ Test across devices and browsers
+□ Validate HTML and CSS
+□ Run accessibility audit
+□ Check performance metrics
+```
+
+### 2. Quality Gates
+
+```javascript
+// ✅ Pre-deployment Quality Checks
+const qualityGates = {
+  accessibility: {
+    colorContrast: "AA",
+    keyboardNavigation: "complete",
+    screenReader: "compatible",
+    ariaLabels: "comprehensive",
+  },
+
+  performance: {
+    loadTime: "<2s",
+    firstContentfulPaint: "<1s",
+    cumulativeLayoutShift: "<0.1",
+    firstInputDelay: "<100ms",
+  },
+
+  responsive: {
+    mobileFirst: true,
+    breakpoints: ["375px", "768px", "1024px", "1280px"],
+    touchFriendly: true,
+    crossBrowser: true,
+  },
+
+  codeQuality: {
+    htmlValidation: "w3c",
+    semanticMarkup: "complete",
+    cssOrganization: "systematic",
+    jsErrorFree: true,
+  },
+};
+```
+
+### 3. Documentation Standards
+
+```markdown
+# ✅ Prototype Documentation Template
+
+## Overview
+
+Brief description of the prototype's purpose and target users.
+
+## Design System
+
+- Color palette and usage guidelines
+- Typography scale and hierarchy
+- Component library and variants
+- Spacing and layout principles
+
+## Technical Implementation
+
+- Technology stack and dependencies
+- File structure and organization
+- Build process and deployment
+- Browser support matrix
+
+## User Flows
+
+- Primary user journeys
+- Interactive states and transitions
+- Error handling scenarios
+- Accessibility considerations
+
+## Testing Results
+
+- Performance metrics
+- Accessibility audit results
+- Cross-browser compatibility
+- User testing feedback
+
+## Future Enhancements
+
+- Planned improvements
+- Technical debt
+- Scalability considerations
+```
+
+Remember: High-fidelity prototypes should be production-ready demonstrations that showcase both design excellence and technical feasibility. Always prioritize user experience, accessibility, and performance while maintaining clean, maintainable code architecture.
+
+---

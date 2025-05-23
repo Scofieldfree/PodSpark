@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小宇宙播客 - 高保真原型展示</title>
+    <meta name="description" content="小宇宙播客应用高保真原型展示，包含完整的用户界面设计和交互演示" />
+    <meta name="keywords" content="播客,音频,原型,UI设计,用户体验" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gradient-to-br from-podcast-light to-blue-50 min-h-screen" x-data="prototypeApp()">
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full flex items-center justify-center"
+              >
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z"
+                    clip-rule="evenodd"
+                  ></path>
+                  <path
+                    fill-rule="evenodd"
+                    d="M12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </div>
+              <h1 class="text-xl font-bold text-gray-900">小宇宙播客</h1>
+              <span class="text-sm px-2 py-1 bg-podcast-primary/10 text-podcast-primary rounded-full">原型展示</span>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <input
+                type="text"
+                placeholder="搜索页面..."
+                x-model="searchQuery"
+                class="w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+              />
+              <svg
+                class="absolute right-3 top-2.5 w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </div>
+
+            <button
+              @click="darkMode = !darkMode"
+              class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              :class="{'bg-gray-800 hover:bg-gray-700 text-white': darkMode}"
+            >
+              <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                ></path>
+              </svg>
+              <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                ></path>
+              </svg>
+            </button>
+
+            <select
+              x-model="deviceMode"
+              class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+            >
+              <option value="desktop">桌面端</option>
+              <option value="tablet">平板端</option>
+              <option value="mobile">移动端</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-8">
+            <div class="text-center">
+              <div class="text-2xl font-bold text-podcast-primary" x-text="pages.length">9</div>
+              <div class="text-sm text-gray-600">总页面数</div>
+            </div>
+            <div class="text-center">
+              <div
+                class="text-2xl font-bold text-green-600"
+                x-text="pages.filter(p => p.status === 'completed').length"
+              >
+                9
+              </div>
+              <div class="text-sm text-gray-600">已完成</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold text-podcast-accent">100%</div>
+              <div class="text-sm text-gray-600">完成度</div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span class="text-sm text-gray-600">已完成</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <span class="text-sm text-gray-600">进行中</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+              <span class="text-sm text-gray-600">规划中</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <template x-for="page in filteredPages" :key="page.path">
+          <div
+            class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <!-- Page Preview -->
+            <div class="relative group">
+              <div
+                class="w-full bg-gray-100 flex items-center justify-center overflow-hidden"
+                :class="getPreviewSize()"
+              >
+                <iframe
+                  :src="page.path"
+                  class="w-full h-full pointer-events-none border-0"
+                  :class="getIframeScale()"
+                  loading="lazy"
+                ></iframe>
+                <div class="absolute inset-0 bg-transparent group-hover:bg-podcast-primary/5 transition-colors"></div>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="absolute top-3 right-3">
+                <div
+                  class="w-3 h-3 rounded-full"
+                  :class="{
+                                    'bg-green-500': page.status === 'completed',
+                                    'bg-yellow-500': page.status === 'in-progress', 
+                                    'bg-gray-400': page.status === 'planned'
+                                }"
+                ></div>
+              </div>
+
+              <!-- Category Badge -->
+              <div class="absolute top-3 left-3">
+                <span
+                  class="px-2 py-1 text-xs font-medium rounded-full text-white"
+                  :class="getCategoryColor(page.category)"
+                  x-text="page.category"
+                ></span>
+              </div>
+            </div>
+
+            <!-- Page Info -->
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-semibold text-gray-900" x-text="page.title"></h3>
+                <span
+                  class="text-xs text-gray-500 ml-2"
+                  x-text="page.status === 'completed' ? '✓' : page.status === 'in-progress' ? '⚡' : '📋'"
+                ></span>
+              </div>
+
+              <p class="text-sm text-gray-600 mb-4 line-clamp-2" x-text="page.description"></p>
+
+              <!-- Features -->
+              <div class="flex flex-wrap gap-1 mb-4">
+                <template x-for="feature in page.features.slice(0, 3)" :key="feature">
+                  <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full" x-text="feature"></span>
+                </template>
+                <span x-show="page.features.length > 3" class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full"
+                  >+更多</span
+                >
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center justify-between">
+                <div class="flex gap-3">
+                  <a
+                    :href="page.path"
+                    target="_blank"
+                    class="text-podcast-primary hover:text-podcast-secondary text-sm font-medium hover:underline"
+                  >
+                    新窗口打开
+                  </a>
+                  <button
+                    @click="previewMobile(page.path)"
+                    class="text-podcast-accent hover:text-cyan-600 text-sm font-medium hover:underline"
+                  >
+                    移动端预览
+                  </button>
+                </div>
+
+                <div class="text-xs text-gray-400">
+                  <span x-text="page.lastUpdated"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="filteredPages.length === 0" class="text-center py-12">
+        <div class="text-gray-400 mb-4">
+          <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">未找到匹配的页面</h3>
+        <p class="text-gray-600">尝试调整搜索关键词或选择不同的分类</p>
+      </div>
+    </main>
+
+    <!-- Mobile Preview Modal -->
+    <div x-show="mobilePreview" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4">
+        <div class="fixed inset-0 bg-black bg-opacity-50" @click="mobilePreview = false"></div>
+        <div class="relative bg-white rounded-lg max-w-sm w-full">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h3 class="text-lg font-medium">移动端预览</h3>
+            <button @click="mobilePreview = false" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="border rounded-lg overflow-hidden">
+              <iframe :src="mobilePreviewUrl" class="w-full h-96"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/script.js"></script>
+    <script>
+      function prototypeApp() {
+        return {
+          darkMode: false,
+          deviceMode: "desktop",
+          searchQuery: "",
+          mobilePreview: false,
+          mobilePreviewUrl: "",
+          pages: [
+            {
+              title: "首页 - 发现",
+              path: "pages/home.html",
+              description: "播客发现页面，展示推荐内容、热门播客和个性化推荐",
+              category: "核心页面",
+              status: "completed",
+              features: ["播客推荐", "分类浏览", "个性化推荐", "热门排行"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "播放器",
+              path: "pages/player.html",
+              description: "音频播放器界面，包含播放控制、进度条、播放列表等功能",
+              category: "核心页面",
+              status: "completed",
+              features: ["音频播放", "进度控制", "播放列表", "音质设置"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "我的播客库",
+              path: "pages/library.html",
+              description: "用户个人播客收藏库，包含订阅、收藏、下载管理",
+              category: "用户中心",
+              status: "completed",
+              features: ["订阅管理", "收藏夹", "下载列表", "播放历史"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "搜索",
+              path: "pages/search.html",
+              description: "全局搜索功能，支持播客、单集、作者等多维度搜索",
+              category: "功能页面",
+              status: "completed",
+              features: ["智能搜索", "搜索建议", "筛选排序", "搜索历史"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "播客详情",
+              path: "pages/podcast-detail.html",
+              description: "播客节目详情页，展示节目信息、单集列表、评价等",
+              category: "内容页面",
+              status: "completed",
+              features: ["节目介绍", "单集列表", "用户评价", "相关推荐"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "单集详情",
+              path: "pages/episode-detail.html",
+              description: "播客单集详情页，包含单集信息、章节导航、评论互动",
+              category: "内容页面",
+              status: "completed",
+              features: ["单集信息", "章节导航", "评论互动", "分享功能"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "个人资料",
+              path: "pages/profile.html",
+              description: "用户个人资料页面，包含基本信息、偏好设置、统计数据",
+              category: "用户中心",
+              status: "completed",
+              features: ["基本信息", "偏好设置", "听播统计", "成就系统"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "订阅管理",
+              path: "pages/subscription.html",
+              description: "播客订阅管理页面，管理已订阅的播客和通知设置",
+              category: "用户中心",
+              status: "completed",
+              features: ["订阅列表", "通知设置", "批量管理", "导入导出"],
+              lastUpdated: "今天",
+            },
+            {
+              title: "社区",
+              path: "pages/community.html",
+              description: "播客社区页面，包含用户动态、讨论区、热门话题",
+              category: "社交功能",
+              status: "completed",
+              features: ["用户动态", "讨论区", "热门话题", "互动功能"],
+              lastUpdated: "今天",
+            },
+          ],
+
+          get filteredPages() {
+            if (!this.searchQuery) return this.pages;
+            return this.pages.filter(
+              (page) =>
+                page.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                page.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                page.category.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          },
+
+          getPreviewSize() {
+            switch (this.deviceMode) {
+              case "mobile":
+                return "h-96";
+              case "tablet":
+                return "h-80";
+              default:
+                return "h-64";
+            }
+          },
+
+          getIframeScale() {
+            switch (this.deviceMode) {
+              case "mobile":
+                return "scale-50 origin-top-left w-[200%] h-[200%]";
+              case "tablet":
+                return "scale-75 origin-top-left w-[133%] h-[133%]";
+              default:
+                return "";
+            }
+          },
+
+          getCategoryColor(category) {
+            const colors = {
+              核心页面: "bg-podcast-primary",
+              用户中心: "bg-podcast-secondary",
+              功能页面: "bg-podcast-accent",
+              内容页面: "bg-green-500",
+              社交功能: "bg-orange-500",
+            };
+            return colors[category] || "bg-gray-500";
+          },
+
+          previewMobile(url) {
+            this.mobilePreviewUrl = url;
+            this.mobilePreview = true;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
