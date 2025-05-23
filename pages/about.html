@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>关于项目 - 小宇宙播客原型</title>
+    <meta name="description" content="了解如何使用Cursor AI生成高保真播客应用原型的开发过程" />
+    <meta name="keywords" content="Cursor AI,播客应用,原型设计,前端开发,AI编程" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="aboutApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">关于项目</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <a
+              href="https://github.com/Scofieldfree"
+              target="_blank"
+              class="flex items-center space-x-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                />
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- 项目介绍 Hero 区域 -->
+      <section class="text-center mb-16">
+        <div class="relative">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-podcast-primary/20 to-podcast-secondary/20 rounded-3xl transform rotate-1"
+          ></div>
+          <div class="relative bg-white rounded-3xl shadow-xl p-12">
+            <div
+              class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full mb-6"
+            >
+              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                ></path>
+              </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">小宇宙播客应用原型</h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              使用 Cursor AI 生成的高保真播客应用原型，展示了现代 Web 开发与 AI 辅助编程的完美结合
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+              <span class="px-4 py-2 bg-podcast-primary/10 text-podcast-primary rounded-full text-sm font-medium">
+                Cursor AI
+              </span>
+              <span class="px-4 py-2 bg-podcast-secondary/10 text-podcast-secondary rounded-full text-sm font-medium">
+                Tailwind CSS
+              </span>
+              <span class="px-4 py-2 bg-podcast-accent/10 text-podcast-accent rounded-full text-sm font-medium">
+                Alpine.js
+              </span>
+              <span class="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium"> HTML5 </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 主要内容 -->
+        <div class="lg:col-span-2 space-y-12">
+          <!-- 开发流程 -->
+          <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">开发流程</h2>
+            <div class="space-y-6">
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-start space-x-4">
+                  <div
+                    class="w-8 h-8 bg-podcast-primary text-white rounded-full flex items-center justify-center text-sm font-bold"
+                  >
+                    1
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">需求分析与规划</h3>
+                    <p class="text-gray-600 mb-4">
+                      首先分析小宇宙播客应用的核心功能，包括音频播放、订阅管理、社区互动等模块，确定原型的功能范围和技术栈。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">功能分析</span>
+                      <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">用户体验设计</span>
+                      <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">技术选型</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-start space-x-4">
+                  <div
+                    class="w-8 h-8 bg-podcast-primary text-white rounded-full flex items-center justify-center text-sm font-bold"
+                  >
+                    2
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Cursor AI 辅助开发</h3>
+                    <p class="text-gray-600 mb-4">
+                      使用 Cursor AI 的智能代码生成功能，通过自然语言描述快速生成页面结构、样式和交互逻辑。AI
+                      帮助提高了开发效率，减少了重复性工作。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">代码生成</span>
+                      <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">智能补全</span>
+                      <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">错误修复</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-start space-x-4">
+                  <div
+                    class="w-8 h-8 bg-podcast-primary text-white rounded-full flex items-center justify-center text-sm font-bold"
+                  >
+                    3
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">页面设计与实现</h3>
+                    <p class="text-gray-600 mb-4">
+                      逐步实现各个核心页面，包括首页发现、音频播放器、搜索功能、用户资料、订阅管理、社区互动等，确保每个页面都具有完整的交互逻辑。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">响应式设计</span>
+                      <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">交互动画</span>
+                      <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">用户体验</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-start space-x-4">
+                  <div
+                    class="w-8 h-8 bg-podcast-primary text-white rounded-full flex items-center justify-center text-sm font-bold"
+                  >
+                    4
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">优化与完善</h3>
+                    <p class="text-gray-600 mb-4">
+                      对生成的代码进行优化，添加自定义样式和动画效果，确保原型的专业性和可用性。同时添加了完整的数据模拟和状态管理。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm">性能优化</span>
+                      <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm">代码重构</span>
+                      <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm">测试验证</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 技术栈详解 -->
+          <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">技术栈详解</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center mb-4">
+                  <div
+                    class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg flex items-center justify-center mr-4"
+                  >
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0L3 7v10c0 5.55 3.84 9.739 9 11 5.16-1.261 9-5.45 9-11V7L12 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Cursor AI</h3>
+                    <p class="text-sm text-gray-600">AI 编程助手</p>
+                  </div>
+                </div>
+                <p class="text-gray-600 text-sm">
+                  使用 Cursor 的 AI 功能快速生成高质量代码，通过自然语言交互实现复杂的前端功能。
+                </p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center mb-4">
+                  <div
+                    class="w-12 h-12 bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-lg flex items-center justify-center mr-4"
+                  >
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path
+                        d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Tailwind CSS</h3>
+                    <p class="text-sm text-gray-600">现代化 CSS 框架</p>
+                  </div>
+                </div>
+                <p class="text-gray-600 text-sm">使用原子化 CSS 类快速构建响应式界面，确保设计的一致性和可维护性。</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center mb-4">
+                  <div
+                    class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-lg flex items-center justify-center mr-4"
+                  >
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path
+                        d="M24 12l-5.657 5.657-1.414-1.414L21.172 12l-4.243-4.243 1.414-1.414L24 12zM2.828 12l4.243 4.243-1.414 1.414L0 12l5.657-5.657 1.414 1.414L2.828 12zm6.96 9H7.66l6.552-18h2.128L9.788 21z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Alpine.js</h3>
+                    <p class="text-sm text-gray-600">轻量级 JS 框架</p>
+                  </div>
+                </div>
+                <p class="text-gray-600 text-sm">
+                  提供简洁的响应式数据绑定和组件系统，无需复杂的构建工具即可实现交互功能。
+                </p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex items-center mb-4">
+                  <div
+                    class="w-12 h-12 bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg flex items-center justify-center mr-4"
+                  >
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path
+                        d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.326 3.426-2.91.804-2.955-.81-.188-2.11H6.248l.33 4.171L12 19.351l5.379-1.443.744-8.157H8.531z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-gray-900">HTML5 & CSS3</h3>
+                    <p class="text-sm text-gray-600">现代 Web 标准</p>
+                  </div>
+                </div>
+                <p class="text-gray-600 text-sm">使用语义化 HTML 和现代 CSS 特性，确保代码的标准性和可访问性。</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Cursor AI 使用心得 -->
+          <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Cursor AI 使用心得</h2>
+            <div class="bg-white rounded-xl shadow-sm p-8">
+              <div class="space-y-6">
+                <div class="border-l-4 border-podcast-primary pl-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">🎯 精确的需求描述</h3>
+                  <p class="text-gray-600">
+                    与 AI
+                    交互时，清晰、具体的需求描述是关键。详细说明功能要求、设计风格和技术限制，能够得到更准确的代码生成结果。
+                  </p>
+                </div>
+
+                <div class="border-l-4 border-podcast-secondary pl-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">🔄 迭代式开发</h3>
+                  <p class="text-gray-600">
+                    利用 AI 的快速迭代能力，先生成基础功能，然后逐步优化和完善。这种方式可以快速验证想法并及时调整方向。
+                  </p>
+                </div>
+
+                <div class="border-l-4 border-podcast-accent pl-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">🧠 人机协作</h3>
+                  <p class="text-gray-600">
+                    AI 擅长生成标准化代码和重复性工作，而人类负责创意设计和逻辑架构。合理分工能够最大化开发效率。
+                  </p>
+                </div>
+
+                <div class="border-l-4 border-green-500 pl-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">📚 学习与总结</h3>
+                  <p class="text-gray-600">
+                    通过分析 AI
+                    生成的代码，可以学习到新的编程技巧和最佳实践。同时要保持批判性思维，对生成的代码进行审查和优化。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 项目特色 -->
+          <section>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">项目特色</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-podcast-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-podcast-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">快速开发</h3>
+                <p class="text-sm text-gray-600">AI 辅助开发大幅提升了开发效率，24小时内完成高保真原型</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">完整功能</h3>
+                <p class="text-sm text-gray-600">包含播放器、搜索、社区、订阅等完整的播客应用功能</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">响应式设计</h3>
+                <p class="text-sm text-gray-600">完全响应式设计，支持桌面、平板和手机等多种设备</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">现代UI</h3>
+                <p class="text-sm text-gray-600">采用现代化的设计语言，提供优秀的用户体验</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">高度可定制</h3>
+                <p class="text-sm text-gray-600">模块化设计，易于扩展和定制，适合不同的业务需求</p>
+              </div>
+
+              <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="font-semibold text-gray-900 mb-2">开源项目</h3>
+                <p class="text-sm text-gray-600">代码开源，供开发者学习和参考 AI 辅助开发的最佳实践</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- 作者信息 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <div class="text-center">
+                <img
+                  src="https://avatars.githubusercontent.com/u/152011852?v=4"
+                  alt="Scofieldfree"
+                  class="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                />
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Scofieldfree</h3>
+                <p class="text-gray-600 text-sm mb-4">前端开发者，AI 技术爱好者，致力于探索 AI 辅助编程的可能性</p>
+                <div class="flex justify-center space-x-3">
+                  <a
+                    href="https://github.com/Scofieldfree"
+                    target="_blank"
+                    class="flex items-center space-x-1 px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path
+                        d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                      />
+                    </svg>
+                    <span>GitHub</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 项目统计 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">项目统计</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">总页面数</span>
+                  <span class="font-semibold text-podcast-primary">10</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">代码行数</span>
+                  <span class="font-semibold text-green-600">8000+</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">开发时间</span>
+                  <span class="font-semibold text-blue-600">24小时</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">AI 参与度</span>
+                  <span class="font-semibold text-purple-600">80%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 技术选择原因 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">技术选择原因</h3>
+              <div class="space-y-4">
+                <div class="border-l-2 border-podcast-primary pl-3">
+                  <h4 class="font-medium text-gray-900 text-sm">Cursor AI</h4>
+                  <p class="text-xs text-gray-600">提供最先进的 AI 编程体验</p>
+                </div>
+                <div class="border-l-2 border-cyan-500 pl-3">
+                  <h4 class="font-medium text-gray-900 text-sm">Tailwind CSS</h4>
+                  <p class="text-xs text-gray-600">快速构建一致的设计系统</p>
+                </div>
+                <div class="border-l-2 border-green-500 pl-3">
+                  <h4 class="font-medium text-gray-900 text-sm">Alpine.js</h4>
+                  <p class="text-xs text-gray-600">轻量级的响应式交互</p>
+                </div>
+                <div class="border-l-2 border-orange-500 pl-3">
+                  <h4 class="font-medium text-gray-900 text-sm">原生 Web 技术</h4>
+                  <p class="text-xs text-gray-600">最佳的兼容性和性能</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 学习资源 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">相关资源</h3>
+              <div class="space-y-3">
+                <a
+                  href="https://cursor.sh/"
+                  target="_blank"
+                  class="block p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <div class="font-medium text-gray-900 text-sm">Cursor 官网</div>
+                  <div class="text-xs text-gray-600">AI 代码编辑器</div>
+                </a>
+                <a
+                  href="https://tailwindcss.com/"
+                  target="_blank"
+                  class="block p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <div class="font-medium text-gray-900 text-sm">Tailwind CSS</div>
+                  <div class="text-xs text-gray-600">CSS 框架文档</div>
+                </a>
+                <a
+                  href="https://alpinejs.dev/"
+                  target="_blank"
+                  class="block p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <div class="font-medium text-gray-900 text-sm">Alpine.js</div>
+                  <div class="text-xs text-gray-600">JavaScript 框架</div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function aboutApp() {
+        return {
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "../index.html";
+            }
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
