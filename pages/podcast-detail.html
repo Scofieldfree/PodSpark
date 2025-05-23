@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>科技聊天室 - 播客详情 - 小宇宙播客</title>
+    <meta name="description" content="科技聊天室播客详情页，包含完整的单集列表、订阅管理和用户评价" />
+    <meta name="keywords" content="播客详情,科技聊天室,播客订阅" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="podcastDetailApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">播客详情</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                ></path>
+              </svg>
+            </button>
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- 播客头部信息 -->
+      <section class="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
+        <div class="relative">
+          <!-- 背景渐变 -->
+          <div class="absolute inset-0 bg-gradient-to-r from-podcast-primary/20 to-podcast-secondary/20"></div>
+
+          <div class="relative p-8">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center space-y-6 lg:space-y-0 lg:space-x-8">
+              <!-- 播客封面 -->
+              <div class="relative">
+                <img :src="podcast.image" :alt="podcast.title" class="w-48 h-48 rounded-2xl shadow-lg object-cover" />
+                <button
+                  @click="playLatestEpisode"
+                  class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all rounded-2xl flex items-center justify-center group"
+                >
+                  <div
+                    class="w-16 h-16 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                  >
+                    <svg class="w-6 h-6 text-podcast-primary ml-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </div>
+                </button>
+              </div>
+
+              <!-- 播客信息 -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="flex-1 min-w-0">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2" x-text="podcast.title"></h1>
+                    <p class="text-lg text-gray-600 mb-4" x-text="podcast.author"></p>
+
+                    <!-- 评分和统计 -->
+                    <div class="flex items-center space-x-6 mb-4">
+                      <div class="flex items-center">
+                        <div class="flex space-x-1">
+                          <template x-for="i in 5" :key="i">
+                            <svg
+                              class="w-5 h-5"
+                              :class="i <= Math.floor(podcast.rating) ? 'text-yellow-400' : 'text-gray-300'"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                              ></path>
+                            </svg>
+                          </template>
+                        </div>
+                        <span class="text-lg font-medium text-gray-900 ml-2" x-text="podcast.rating"></span>
+                        <span class="text-gray-500 ml-1">(<span x-text="podcast.reviewCount"></span> 评价)</span>
+                      </div>
+                      <div class="flex items-center space-x-4 text-gray-600">
+                        <span x-text="podcast.episodeCount + ' 集'"></span>
+                        <span x-text="podcast.subscriberCount + ' 订阅'"></span>
+                        <span x-text="formatDate(podcast.lastUpdated)"></span>
+                      </div>
+                    </div>
+
+                    <!-- 分类标签 -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                      <template x-for="tag in podcast.tags" :key="tag">
+                        <span
+                          class="px-3 py-1 text-sm font-medium bg-podcast-primary/10 text-podcast-primary rounded-full"
+                          x-text="tag"
+                        ></span>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- 操作按钮 -->
+                  <div class="flex flex-col space-y-3 ml-6">
+                    <button
+                      @click="toggleSubscription"
+                      class="flex items-center px-6 py-3 rounded-xl font-semibold transition-all"
+                      :class="podcast.isSubscribed 
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                        : 'bg-podcast-primary text-white hover:bg-podcast-secondary'"
+                    >
+                      <svg
+                        class="w-5 h-5 mr-2"
+                        :fill="podcast.isSubscribed ? 'currentColor' : 'none'"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                        ></path>
+                      </svg>
+                      <span x-text="podcast.isSubscribed ? '已订阅' : '订阅播客'"></span>
+                    </button>
+
+                    <button
+                      @click="toggleNotification"
+                      class="flex items-center px-6 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg
+                        class="w-5 h-5 mr-2"
+                        :class="podcast.notificationEnabled ? 'text-podcast-primary' : 'text-gray-400'"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 01-7.5-7.5H7.5a7.5 7.5 0 017.5 7.5v5z"
+                        ></path>
+                      </svg>
+                      <span x-text="podcast.notificationEnabled ? '已开启通知' : '开启通知'"></span>
+                    </button>
+
+                    <button
+                      class="flex items-center px-6 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                        ></path>
+                      </svg>
+                      分享
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 播客描述 -->
+                <div class="prose max-w-none">
+                  <p class="text-gray-700 leading-relaxed" x-text="podcast.description"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 导航标签 -->
+      <div class="flex space-x-1 mb-6">
+        <button
+          @click="activeTab = 'episodes'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'episodes' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          单集 (<span x-text="episodes.length"></span>)
+        </button>
+        <button
+          @click="activeTab = 'about'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'about' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          详情
+        </button>
+        <button
+          @click="activeTab = 'reviews'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'reviews' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          评价 (<span x-text="reviews.length"></span>)
+        </button>
+        <button
+          @click="activeTab = 'related'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'related' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          相关推荐
+        </button>
+      </div>
+
+      <!-- 标签内容 -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- 主要内容区域 -->
+        <div class="lg:col-span-3">
+          <!-- 单集列表 -->
+          <div x-show="activeTab === 'episodes'">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-gray-900">所有单集</h2>
+              <div class="flex items-center space-x-4">
+                <select
+                  x-model="sortOrder"
+                  @change="sortEpisodes"
+                  class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+                >
+                  <option value="newest">最新发布</option>
+                  <option value="oldest">最早发布</option>
+                  <option value="popular">最受欢迎</option>
+                  <option value="duration">时长排序</option>
+                </select>
+                <button
+                  @click="playAllEpisodes"
+                  class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                >
+                  播放全部
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <template x-for="(episode, index) in sortedEpisodes" :key="episode.id">
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                  <div class="flex items-start space-x-4">
+                    <!-- 单集封面 -->
+                    <div class="relative group">
+                      <img
+                        :src="episode.image || podcast.image"
+                        :alt="episode.title"
+                        class="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <button
+                        @click="playEpisode(episode)"
+                        class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-lg flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- 单集信息 -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0">
+                          <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2" x-text="episode.title"></h3>
+                          <p class="text-gray-600 text-sm mb-3 line-clamp-3" x-text="episode.description"></p>
+
+                          <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span x-text="formatDate(episode.publishDate)"></span>
+                            <span x-text="formatDuration(episode.duration)"></span>
+                            <span x-text="episode.playCount + ' 次播放'"></span>
+                            <span
+                              x-show="episode.isNew"
+                              class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium"
+                              >新</span
+                            >
+                          </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="flex items-center space-x-2 ml-4">
+                          <button
+                            @click="toggleFavorite(episode)"
+                            class="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                            :class="episode.isFavorite ? 'text-red-500' : ''"
+                          >
+                            <svg
+                              class="w-5 h-5"
+                              :fill="episode.isFavorite ? 'currentColor' : 'none'"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          <button
+                            @click="downloadEpisode(episode)"
+                            class="p-2 text-gray-400 hover:text-podcast-primary transition-colors"
+                          >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                              ></path>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- 加载更多 -->
+            <div class="text-center mt-8">
+              <button
+                x-show="hasMoreEpisodes"
+                @click="loadMoreEpisodes"
+                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                加载更多单集
+              </button>
+            </div>
+          </div>
+
+          <!-- 详情标签页 -->
+          <div x-show="activeTab === 'about'" class="bg-white rounded-xl shadow-sm p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">播客详情</h2>
+
+            <div class="space-y-6">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">关于播客</h3>
+                <div class="prose max-w-none">
+                  <p class="text-gray-700 leading-relaxed" x-text="podcast.longDescription"></p>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">主播信息</h3>
+                <div class="flex items-start space-x-4">
+                  <img :src="podcast.authorAvatar" :alt="podcast.author" class="w-16 h-16 rounded-full object-cover" />
+                  <div>
+                    <h4 class="font-semibold text-gray-900" x-text="podcast.author"></h4>
+                    <p class="text-gray-600 mt-1" x-text="podcast.authorBio"></p>
+                    <div class="flex items-center space-x-4 mt-3 text-sm text-gray-500">
+                      <span x-text="podcast.authorPodcastCount + ' 个播客'"></span>
+                      <span x-text="podcast.authorFollowerCount + ' 关注者'"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">播客统计</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-podcast-primary" x-text="podcast.totalPlays"></div>
+                    <div class="text-sm text-gray-600">总播放量</div>
+                  </div>
+                  <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-podcast-primary" x-text="podcast.avgDuration"></div>
+                    <div class="text-sm text-gray-600">平均时长</div>
+                  </div>
+                  <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-podcast-primary" x-text="podcast.updateFrequency"></div>
+                    <div class="text-sm text-gray-600">更新频率</div>
+                  </div>
+                  <div class="text-center p-4 bg-gray-50 rounded-lg">
+                    <div class="text-2xl font-bold text-podcast-primary" x-text="formatDate(podcast.startDate)"></div>
+                    <div class="text-sm text-gray-600">开播时间</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 评价标签页 -->
+          <div x-show="activeTab === 'reviews'" class="space-y-6">
+            <!-- 评价概览 -->
+            <div class="bg-white rounded-xl shadow-sm p-8">
+              <h2 class="text-xl font-bold text-gray-900 mb-6">用户评价</h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="text-center">
+                  <div class="text-5xl font-bold text-podcast-primary mb-2" x-text="podcast.rating"></div>
+                  <div class="flex justify-center mb-2">
+                    <template x-for="i in 5" :key="i">
+                      <svg
+                        class="w-6 h-6"
+                        :class="i <= Math.floor(podcast.rating) ? 'text-yellow-400' : 'text-gray-300'"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                        ></path>
+                      </svg>
+                    </template>
+                  </div>
+                  <div class="text-gray-600" x-text="podcast.reviewCount + ' 个评价'"></div>
+                </div>
+
+                <div class="space-y-2">
+                  <template x-for="(rating, index) in ratingDistribution" :key="index">
+                    <div class="flex items-center space-x-3">
+                      <span class="text-sm text-gray-600 w-8" x-text="5 - index + ' 星'"></span>
+                      <div class="flex-1 bg-gray-200 rounded-full h-2">
+                        <div class="bg-yellow-400 h-2 rounded-full" :style="`width: ${rating}%`"></div>
+                      </div>
+                      <span class="text-sm text-gray-600 w-12" x-text="rating + '%'"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="mt-8">
+                <button
+                  @click="showWriteReview = true"
+                  class="px-6 py-3 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                >
+                  写评价
+                </button>
+              </div>
+            </div>
+
+            <!-- 评价列表 -->
+            <div class="space-y-4">
+              <template x-for="review in reviews" :key="review.id">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                  <div class="flex items-start space-x-4">
+                    <img :src="review.userAvatar" :alt="review.userName" class="w-12 h-12 rounded-full object-cover" />
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between mb-2">
+                        <div>
+                          <h4 class="font-semibold text-gray-900" x-text="review.userName"></h4>
+                          <div class="flex items-center mt-1">
+                            <template x-for="i in 5" :key="i">
+                              <svg
+                                class="w-4 h-4"
+                                :class="i <= review.rating ? 'text-yellow-400' : 'text-gray-300'"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                                ></path>
+                              </svg>
+                            </template>
+                          </div>
+                        </div>
+                        <span class="text-sm text-gray-500" x-text="formatDate(review.date)"></span>
+                      </div>
+                      <p class="text-gray-700" x-text="review.content"></p>
+
+                      <div class="flex items-center space-x-4 mt-4">
+                        <button class="flex items-center text-sm text-gray-500 hover:text-gray-700">
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V8a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905 0 .905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                            ></path>
+                          </svg>
+                          有用 (<span x-text="review.likes"></span>)
+                        </button>
+                        <button class="text-sm text-gray-500 hover:text-gray-700">回复</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- 相关推荐标签页 -->
+          <div x-show="activeTab === 'related'">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">相关推荐</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <template x-for="relatedPodcast in relatedPodcasts" :key="relatedPodcast.id">
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow podcast-card">
+                  <div class="flex items-center space-x-4">
+                    <img
+                      :src="relatedPodcast.image"
+                      :alt="relatedPodcast.title"
+                      class="w-16 h-16 rounded-xl object-cover"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-gray-900 line-clamp-2" x-text="relatedPodcast.title"></h3>
+                      <p class="text-sm text-gray-600 mt-1" x-text="relatedPodcast.author"></p>
+                      <div class="flex items-center mt-2">
+                        <div class="flex space-x-1">
+                          <template x-for="i in 5" :key="i">
+                            <svg
+                              class="w-3 h-3"
+                              :class="i <= Math.floor(relatedPodcast.rating) ? 'text-yellow-400' : 'text-gray-300'"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                              ></path>
+                            </svg>
+                          </template>
+                        </div>
+                        <span class="text-xs text-gray-600 ml-1" x-text="relatedPodcast.rating"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- 最新单集 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">最新单集</h3>
+              <div class="space-y-3">
+                <template x-for="episode in latestEpisodes.slice(0, 3)" :key="episode.id">
+                  <div class="flex items-center space-x-3 group cursor-pointer" @click="playEpisode(episode)">
+                    <img
+                      :src="episode.image || podcast.image"
+                      :alt="episode.title"
+                      class="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <h4
+                        class="font-medium text-gray-900 line-clamp-2 group-hover:text-podcast-primary transition-colors"
+                        x-text="episode.title"
+                      ></h4>
+                      <p class="text-sm text-gray-500" x-text="formatDate(episode.publishDate)"></p>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 播客统计 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">统计信息</h3>
+              <div class="space-y-4">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">总单集数</span>
+                  <span class="font-semibold" x-text="podcast.episodeCount"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">订阅人数</span>
+                  <span class="font-semibold" x-text="podcast.subscriberCount"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">平均评分</span>
+                  <span class="font-semibold" x-text="podcast.rating + '/5.0'"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">更新频率</span>
+                  <span class="font-semibold" x-text="podcast.updateFrequency"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 分享 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">分享播客</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  class="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                >
+                  微信
+                </button>
+                <button
+                  class="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                >
+                  微博
+                </button>
+                <button
+                  class="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                >
+                  复制链接
+                </button>
+                <button
+                  class="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                >
+                  更多
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 写评价模态框 -->
+    <div
+      x-show="showWriteReview"
+      x-cloak
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      @click.self="showWriteReview = false"
+    >
+      <div class="bg-white rounded-xl w-full max-w-md">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold">写评价</h3>
+            <button @click="showWriteReview = false" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">评分</label>
+              <div class="flex space-x-1">
+                <template x-for="i in 5" :key="i">
+                  <button
+                    @click="newReviewRating = i"
+                    class="w-8 h-8"
+                    :class="i <= newReviewRating ? 'text-yellow-400' : 'text-gray-300'"
+                  >
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                      ></path>
+                    </svg>
+                  </button>
+                </template>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">评价内容</label>
+              <textarea
+                x-model="newReviewContent"
+                rows="4"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                placeholder="分享您对这个播客的看法..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="flex space-x-3 mt-6">
+            <button
+              @click="showWriteReview = false"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            >
+              取消
+            </button>
+            <button
+              @click="submitReview"
+              class="flex-1 px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary"
+            >
+              提交评价
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function podcastDetailApp() {
+        return {
+          activeTab: "episodes",
+          sortOrder: "newest",
+          hasMoreEpisodes: true,
+          showWriteReview: false,
+          newReviewRating: 5,
+          newReviewContent: "",
+
+          podcast: {
+            id: 1,
+            title: "科技聊天室",
+            author: "科技小栈",
+            image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+            description:
+              "深度探讨最新科技趋势和创新，为你解读数字时代的发展脉络。从人工智能到区块链，从创业故事到行业分析，我们用专业而生动的方式为您呈现科技世界的精彩。",
+            longDescription:
+              "《科技聊天室》是一档专注于科技领域的深度访谈播客。我们邀请行业专家、创业者、投资人和研究学者，与听众分享最前沿的科技趋势、创新思维和实战经验。\n\n节目涵盖人工智能、机器学习、区块链、物联网、云计算等热门技术话题，同时也会探讨科技对社会、经济和生活的深远影响。我们希望通过这个平台，让更多人了解科技的魅力，启发创新思维。",
+            rating: 4.8,
+            reviewCount: 1205,
+            episodeCount: 125,
+            subscriberCount: 12500,
+            lastUpdated: "2024-01-15",
+            isSubscribed: false,
+            notificationEnabled: false,
+            tags: ["科技", "人工智能", "创业", "创新"],
+            authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+            authorBio: "资深科技记者，专注人工智能和创业投资领域10余年",
+            authorPodcastCount: 3,
+            authorFollowerCount: 25600,
+            totalPlays: "156万",
+            avgDuration: "45分钟",
+            updateFrequency: "每周一集",
+            startDate: "2022-03-15",
+          },
+
+          episodes: [
+            {
+              id: 1,
+              title: "人工智能的未来展望：从GPT到AGI的演进之路",
+              description:
+                "深入探讨人工智能技术的发展趋势，分析从当前的大语言模型到通用人工智能的可能路径。我们邀请了OpenAI的研究科学家，分享最新的研究进展和技术挑战。",
+              duration: 2580,
+              publishDate: "2024-01-15",
+              playCount: 5600,
+              isFavorite: false,
+              isNew: true,
+            },
+            {
+              id: 2,
+              title: "区块链技术深度解析：Web3时代的机遇与挑战",
+              description: "从技术角度深入理解区块链的原理和应用，探讨Web3时代的商业模式和发展机遇。",
+              duration: 3240,
+              publishDate: "2024-01-08",
+              playCount: 4200,
+              isFavorite: true,
+              isNew: false,
+            },
+            {
+              id: 3,
+              title: "元宇宙技术栈分析：VR/AR技术的现状与前景",
+              description: "深入分析元宇宙背后的核心技术，包括虚拟现实、增强现实、3D引擎等技术的发展现状。",
+              duration: 2760,
+              publishDate: "2024-01-01",
+              playCount: 3800,
+              isFavorite: false,
+              isNew: false,
+            },
+          ],
+
+          reviews: [
+            {
+              id: 1,
+              userName: "科技爱好者",
+              userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
+              rating: 5,
+              content: "非常棒的播客！主播的专业知识很扎实，能够深入浅出地解释复杂的技术概念。每期节目都有很多收获。",
+              date: "2024-01-10",
+              likes: 24,
+            },
+            {
+              id: 2,
+              userName: "程序员小王",
+              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+              rating: 4,
+              content: "内容质量很高，不过有时候技术细节稍微深了一点，希望能够照顾一下非技术背景的听众。",
+              date: "2024-01-08",
+              likes: 15,
+            },
+          ],
+
+          relatedPodcasts: [
+            {
+              id: 2,
+              title: "商业新视角",
+              author: "商业观察者",
+              image: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=300&h=300&fit=crop",
+              rating: 4.6,
+            },
+            {
+              id: 3,
+              title: "创业故事",
+              author: "创业导师",
+              image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=300&h=300&fit=crop",
+              rating: 4.7,
+            },
+          ],
+
+          ratingDistribution: [85, 12, 2, 1, 0],
+
+          get latestEpisodes() {
+            return this.episodes.slice(0, 3);
+          },
+
+          get sortedEpisodes() {
+            const sorted = [...this.episodes];
+            switch (this.sortOrder) {
+              case "newest":
+                return sorted.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate));
+              case "oldest":
+                return sorted.sort((a, b) => new Date(a.publishDate) - new Date(b.publishDate));
+              case "popular":
+                return sorted.sort((a, b) => b.playCount - a.playCount);
+              case "duration":
+                return sorted.sort((a, b) => b.duration - a.duration);
+              default:
+                return sorted;
+            }
+          },
+
+          toggleSubscription() {
+            this.podcast.isSubscribed = !this.podcast.isSubscribed;
+            console.log(this.podcast.isSubscribed ? "已订阅" : "已取消订阅");
+          },
+
+          toggleNotification() {
+            this.podcast.notificationEnabled = !this.podcast.notificationEnabled;
+            console.log(this.podcast.notificationEnabled ? "已开启通知" : "已关闭通知");
+          },
+
+          playLatestEpisode() {
+            this.playEpisode(this.episodes[0]);
+          },
+
+          playEpisode(episode) {
+            console.log("播放单集:", episode.title);
+            // 跳转到播放器页面
+            // window.location.href = `player.html?episode=${episode.id}`;
+          },
+
+          playAllEpisodes() {
+            console.log("播放所有单集");
+          },
+
+          sortEpisodes() {
+            // 排序逻辑已在 sortedEpisodes 计算属性中实现
+          },
+
+          toggleFavorite(episode) {
+            episode.isFavorite = !episode.isFavorite;
+            console.log(episode.isFavorite ? "已收藏" : "已取消收藏", episode.title);
+          },
+
+          downloadEpisode(episode) {
+            console.log("下载单集:", episode.title);
+          },
+
+          loadMoreEpisodes() {
+            // 模拟加载更多
+            console.log("加载更多单集");
+            this.hasMoreEpisodes = false;
+          },
+
+          submitReview() {
+            if (this.newReviewRating && this.newReviewContent.trim()) {
+              const newReview = {
+                id: this.reviews.length + 1,
+                userName: "当前用户",
+                userAvatar:
+                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+                rating: this.newReviewRating,
+                content: this.newReviewContent,
+                date: new Date().toISOString().split("T")[0],
+                likes: 0,
+              };
+
+              this.reviews.unshift(newReview);
+              this.showWriteReview = false;
+              this.newReviewRating = 5;
+              this.newReviewContent = "";
+
+              console.log("评价已提交");
+            }
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return "昨天";
+            if (diffDays < 7) return `${diffDays}天前`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+
+          formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+
+            if (hours > 0) {
+              return `${hours}小时${minutes}分钟`;
+            }
+            return `${minutes}分钟`;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

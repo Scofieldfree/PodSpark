@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>人工智能的未来展望 - 单集详情 - 小宇宙播客</title>
+    <meta name="description" content="单集详情页，包含完整播放器、文稿、评论和相关推荐" />
+    <meta name="keywords" content="播客单集,人工智能,科技聊天室" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="episodeDetailApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">单集详情</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button
+              @click="toggleFavorite"
+              class="text-gray-600 hover:text-red-500"
+              :class="episode.isFavorite ? 'text-red-500' : ''"
+            >
+              <svg
+                class="w-6 h-6"
+                :fill="episode.isFavorite ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                ></path>
+              </svg>
+            </button>
+            <button @click="shareEpisode" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                ></path>
+              </svg>
+            </button>
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- 单集头部信息 -->
+      <section class="bg-white rounded-2xl shadow-sm overflow-hidden mb-8">
+        <div class="p-8">
+          <!-- 播客信息 -->
+          <div class="flex items-center space-x-4 mb-6">
+            <img :src="episode.podcastImage" :alt="episode.podcastTitle" class="w-16 h-16 rounded-xl object-cover" />
+            <div>
+              <h2
+                class="text-lg font-semibold text-podcast-primary hover:text-podcast-secondary cursor-pointer"
+                x-text="episode.podcastTitle"
+              ></h2>
+              <p class="text-gray-600" x-text="episode.author"></p>
+            </div>
+            <div class="ml-auto">
+              <button
+                @click="subscribeToPodcast"
+                class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors text-sm"
+                :class="episode.isSubscribed ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''"
+              >
+                <span x-text="episode.isSubscribed ? '已订阅' : '订阅'"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 单集标题和描述 -->
+          <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4 leading-tight" x-text="episode.title"></h1>
+            <div class="flex items-center space-x-6 text-gray-600 mb-4">
+              <span x-text="formatDate(episode.publishDate)"></span>
+              <span x-text="formatDuration(episode.duration)"></span>
+              <span x-text="episode.playCount + ' 次播放'"></span>
+              <div class="flex items-center">
+                <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  ></path>
+                </svg>
+                <span x-text="episode.rating"></span>
+              </div>
+            </div>
+            <p class="text-gray-700 leading-relaxed" x-text="episode.description"></p>
+          </div>
+
+          <!-- 播放器控制区域 -->
+          <div class="bg-gray-50 rounded-xl p-6">
+            <div class="flex items-center space-x-4 mb-4">
+              <!-- 播放按钮 -->
+              <button
+                @click="togglePlay"
+                class="w-14 h-14 bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+              >
+                <svg x-show="!isPlaying" class="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                <svg x-show="isPlaying" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+              </button>
+
+              <!-- 时间显示 -->
+              <div class="flex-1">
+                <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
+                  <span x-text="formatTime(currentTime)">0:00</span>
+                  <span x-text="formatTime(episode.duration)">43:00</span>
+                </div>
+                <!-- 进度条 -->
+                <div class="progress-bar h-2 bg-gray-300 rounded-full cursor-pointer" @click="seekTo($event)">
+                  <div
+                    class="progress h-full bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full"
+                    :style="`width: ${progress * 100}%`"
+                  ></div>
+                </div>
+              </div>
+
+              <!-- 控制按钮 -->
+              <div class="flex items-center space-x-3">
+                <button @click="seekBackward" class="p-2 text-gray-600 hover:text-gray-900">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"
+                    ></path>
+                  </svg>
+                </button>
+
+                <button @click="seekForward" class="p-2 text-gray-600 hover:text-gray-900">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798L4.555 5.168z"
+                    ></path>
+                  </svg>
+                </button>
+
+                <!-- 播放速度 -->
+                <select
+                  x-model="playbackRate"
+                  @change="setPlaybackRate"
+                  class="text-sm px-2 py-1 border border-gray-300 rounded bg-white"
+                >
+                  <option value="0.5">0.5x</option>
+                  <option value="0.75">0.75x</option>
+                  <option value="1">1x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2">2x</option>
+                </select>
+
+                <!-- 音量控制 -->
+                <div class="flex items-center space-x-2">
+                  <button @click="toggleMute" class="text-gray-600 hover:text-gray-900">
+                    <svg x-show="!isMuted && volume > 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    <svg x-show="!isMuted && volume <= 0.5" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                    <svg x-show="isMuted" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+                        clip-rule="evenodd"
+                      ></path>
+                    </svg>
+                  </button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    x-model="volume"
+                    @input="setVolume"
+                    class="w-16 volume-slider"
+                  />
+                </div>
+
+                <!-- 下载按钮 -->
+                <button @click="downloadEpisode" class="p-2 text-gray-600 hover:text-podcast-primary">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- 章节导航 (如果有) -->
+            <div x-show="chapters.length > 0" class="border-t border-gray-200 pt-4">
+              <h4 class="text-sm font-medium text-gray-900 mb-3">章节导航</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <template x-for="(chapter, index) in chapters" :key="index">
+                  <button
+                    @click="jumpToChapter(chapter.time)"
+                    class="text-left p-2 text-sm rounded hover:bg-gray-100 transition-colors"
+                    :class="isCurrentChapter(chapter.time) ? 'bg-podcast-primary/10 text-podcast-primary' : 'text-gray-700'"
+                  >
+                    <div class="font-medium" x-text="chapter.title"></div>
+                    <div class="text-xs text-gray-500" x-text="formatTime(chapter.time)"></div>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 导航标签 -->
+      <div class="flex space-x-1 mb-6">
+        <button
+          @click="activeTab = 'notes'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'notes' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          节目笔记
+        </button>
+        <button
+          @click="activeTab = 'transcript'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'transcript' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          文稿
+        </button>
+        <button
+          @click="activeTab = 'comments'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'comments' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          评论 (<span x-text="comments.length"></span>)
+        </button>
+        <button
+          @click="activeTab = 'related'"
+          class="px-4 py-2 rounded-lg font-medium transition-colors"
+          :class="activeTab === 'related' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+        >
+          相关单集
+        </button>
+      </div>
+
+      <!-- 标签内容 -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- 主要内容区域 -->
+        <div class="lg:col-span-3">
+          <!-- 节目笔记 -->
+          <div x-show="activeTab === 'notes'" class="bg-white rounded-xl shadow-sm p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">节目笔记</h2>
+
+            <div class="prose max-w-none">
+              <div x-html="episode.showNotes"></div>
+            </div>
+
+            <!-- 相关链接 -->
+            <div x-show="episode.links && episode.links.length > 0" class="mt-8 pt-6 border-t border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">相关链接</h3>
+              <div class="space-y-3">
+                <template x-for="link in episode.links" :key="link.url">
+                  <a
+                    :href="link.url"
+                    target="_blank"
+                    class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors group"
+                  >
+                    <div class="flex-1">
+                      <h4 class="font-medium text-gray-900 group-hover:text-podcast-primary" x-text="link.title"></h4>
+                      <p class="text-sm text-gray-600" x-text="link.description"></p>
+                    </div>
+                    <svg
+                      class="w-5 h-5 text-gray-400 group-hover:text-podcast-primary"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      ></path>
+                    </svg>
+                  </a>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- 文稿 -->
+          <div x-show="activeTab === 'transcript'" class="bg-white rounded-xl shadow-sm p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-gray-900">文稿</h2>
+              <div class="flex items-center space-x-4">
+                <button
+                  @click="toggleTranscriptSync"
+                  class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  :class="transcriptSync ? 'bg-podcast-primary text-white border-podcast-primary' : ''"
+                >
+                  <span x-text="transcriptSync ? '已同步播放' : '同步播放'"></span>
+                </button>
+                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                  复制文稿
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-4">
+              <template x-for="(segment, index) in transcript" :key="index">
+                <div
+                  class="p-4 rounded-lg cursor-pointer transition-colors"
+                  :class="transcriptSync && isCurrentSegment(segment.time) ? 'bg-podcast-primary/10 border border-podcast-primary' : 'hover:bg-gray-50'"
+                  @click="jumpToTime(segment.time)"
+                >
+                  <div class="flex items-start space-x-4">
+                    <span
+                      class="text-sm font-medium text-podcast-primary min-w-0"
+                      x-text="formatTime(segment.time)"
+                    ></span>
+                    <div class="flex-1">
+                      <p class="text-gray-900 leading-relaxed" x-text="segment.text"></p>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- 文稿搜索 -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="搜索文稿内容..."
+                  x-model="transcriptSearch"
+                  @input="searchTranscript"
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                />
+                <svg
+                  class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 评论 -->
+          <div x-show="activeTab === 'comments'" class="space-y-6">
+            <!-- 写评论 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">写评论</h3>
+              <div class="space-y-4">
+                <textarea
+                  x-model="newComment"
+                  rows="3"
+                  placeholder="分享您对这一集的看法..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                ></textarea>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                      <input
+                        type="checkbox"
+                        x-model="commentWithTimestamp"
+                        class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                      />
+                      <span class="ml-2 text-sm text-gray-600">包含当前播放时间</span>
+                    </label>
+                  </div>
+                  <button
+                    @click="submitComment"
+                    class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors disabled:opacity-50"
+                    :disabled="!newComment.trim()"
+                  >
+                    发布评论
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 评论列表 -->
+            <div class="space-y-4">
+              <template x-for="comment in comments" :key="comment.id">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                  <div class="flex items-start space-x-4">
+                    <img
+                      :src="comment.userAvatar"
+                      :alt="comment.userName"
+                      class="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center space-x-3">
+                          <h4 class="font-semibold text-gray-900" x-text="comment.userName"></h4>
+                          <span class="text-sm text-gray-500" x-text="formatDate(comment.date)"></span>
+                          <span
+                            x-show="comment.timestamp"
+                            class="text-xs px-2 py-1 bg-podcast-primary/10 text-podcast-primary rounded-full cursor-pointer"
+                            @click="jumpToTime(comment.timestamp)"
+                            x-text="formatTime(comment.timestamp)"
+                          ></span>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                            ></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <p class="text-gray-700 mb-3" x-text="comment.content"></p>
+
+                      <div class="flex items-center space-x-4">
+                        <button
+                          @click="toggleCommentLike(comment)"
+                          class="flex items-center text-sm text-gray-500 hover:text-gray-700"
+                          :class="comment.isLiked ? 'text-podcast-primary' : ''"
+                        >
+                          <svg
+                            class="w-4 h-4 mr-1"
+                            :fill="comment.isLiked ? 'currentColor' : 'none'"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V8a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                            ></path>
+                          </svg>
+                          <span x-text="comment.likes"></span>
+                        </button>
+                        <button class="text-sm text-gray-500 hover:text-gray-700">回复</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <!-- 加载更多评论 -->
+            <div class="text-center">
+              <button
+                x-show="hasMoreComments"
+                @click="loadMoreComments"
+                class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                加载更多评论
+              </button>
+            </div>
+          </div>
+
+          <!-- 相关单集 -->
+          <div x-show="activeTab === 'related'">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">相关单集</h2>
+
+            <div class="space-y-4">
+              <template x-for="relatedEpisode in relatedEpisodes" :key="relatedEpisode.id">
+                <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                  <div class="flex items-start space-x-4">
+                    <div class="relative group">
+                      <img
+                        :src="relatedEpisode.image"
+                        :alt="relatedEpisode.title"
+                        class="w-20 h-20 rounded-xl object-cover"
+                      />
+                      <button
+                        @click="playRelatedEpisode(relatedEpisode)"
+                        class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-xl flex items-center justify-center"
+                      >
+                        <svg
+                          class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                            clip-rule="evenodd"
+                          ></path>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3
+                        class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2"
+                        x-text="relatedEpisode.title"
+                      ></h3>
+                      <p class="text-gray-600 text-sm mb-3 line-clamp-2" x-text="relatedEpisode.description"></p>
+                      <div class="flex items-center space-x-4 text-sm text-gray-500">
+                        <span x-text="formatDate(relatedEpisode.publishDate)"></span>
+                        <span x-text="formatDuration(relatedEpisode.duration)"></span>
+                        <span x-text="relatedEpisode.playCount + ' 次播放'"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- 播客信息卡片 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <div class="text-center">
+                <img
+                  :src="episode.podcastImage"
+                  :alt="episode.podcastTitle"
+                  class="w-24 h-24 rounded-xl object-cover mx-auto mb-4"
+                />
+                <h3 class="font-semibold text-gray-900 mb-2" x-text="episode.podcastTitle"></h3>
+                <p class="text-sm text-gray-600 mb-4" x-text="episode.author"></p>
+                <button
+                  @click="subscribeToPodcast"
+                  class="w-full px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                  :class="episode.isSubscribed ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''"
+                >
+                  <span x-text="episode.isSubscribed ? '已订阅' : '订阅播客'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 单集统计 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">统计信息</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">播放次数</span>
+                  <span class="font-semibold" x-text="episode.playCount"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">收藏数</span>
+                  <span class="font-semibold" x-text="episode.favoriteCount"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">评论数</span>
+                  <span class="font-semibold" x-text="comments.length"></span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">评分</span>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 text-yellow-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                      ></path>
+                    </svg>
+                    <span class="font-semibold" x-text="episode.rating"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 快速分享 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">分享单集</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  class="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <span class="text-sm">微信</span>
+                </button>
+                <button
+                  class="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <span class="text-sm">微博</span>
+                </button>
+                <button
+                  class="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <span class="text-sm">复制链接</span>
+                </button>
+                <button
+                  class="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <span class="text-sm">生成海报</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 热门评论 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">热门评论</h3>
+              <div class="space-y-4">
+                <template x-for="comment in topComments" :key="comment.id">
+                  <div class="border-l-2 border-podcast-primary pl-3">
+                    <p class="text-sm text-gray-700 mb-2" x-text="comment.content"></p>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span x-text="comment.userName"></span>
+                      <span x-text="comment.likes + ' 赞'"></span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function episodeDetailApp() {
+        return {
+          activeTab: "notes",
+          isPlaying: false,
+          currentTime: 0,
+          progress: 0,
+          volume: 0.8,
+          isMuted: false,
+          playbackRate: 1,
+          transcriptSync: false,
+          transcriptSearch: "",
+          newComment: "",
+          commentWithTimestamp: false,
+          hasMoreComments: true,
+
+          episode: {
+            id: 1,
+            title: "人工智能的未来展望：从GPT到AGI的演进之路",
+            description:
+              "深入探讨人工智能技术的发展趋势，分析从当前的大语言模型到通用人工智能的可能路径。我们邀请了OpenAI的研究科学家，分享最新的研究进展和技术挑战。",
+            podcastTitle: "科技聊天室",
+            podcastImage: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+            author: "科技小栈",
+            duration: 2580, // 43分钟
+            publishDate: "2024-01-15",
+            playCount: 5600,
+            favoriteCount: 324,
+            rating: 4.8,
+            isFavorite: false,
+            isSubscribed: false,
+            showNotes: `
+              <h3>本期嘉宾</h3>
+              <p>张博士，OpenAI 研究科学家，专注于大语言模型和通用人工智能研究</p>
+              
+              <h3>主要话题</h3>
+              <ul>
+                <li>GPT系列模型的技术演进历程</li>
+                <li>当前大语言模型的能力边界与局限性</li>
+                <li>从ANI到AGI的技术路径分析</li>
+                <li>AI安全与对齐问题的重要性</li>
+                <li>未来5-10年的AI发展预测</li>
+              </ul>
+              
+              <h3>核心观点</h3>
+              <blockquote>
+                <p>"通用人工智能的实现不仅仅是技术问题，更是一个关乎人类未来的社会问题。我们需要在技术发展和安全控制之间找到平衡。"</p>
+              </blockquote>
+            `,
+            links: [
+              {
+                title: "OpenAI 官方网站",
+                url: "https://openai.com",
+                description: "了解最新的AI技术研究和产品",
+              },
+              {
+                title: "《通用人工智能：未来已来》",
+                url: "#",
+                description: "推荐阅读：深入了解AGI的发展前景",
+              },
+            ],
+          },
+
+          chapters: [
+            { title: "开场与嘉宾介绍", time: 0 },
+            { title: "GPT技术演进历程", time: 300 },
+            { title: "大语言模型的能力分析", time: 900 },
+            { title: "AGI发展路径探讨", time: 1500 },
+            { title: "AI安全与伦理问题", time: 2100 },
+            { title: "未来发展预测", time: 2400 },
+          ],
+
+          transcript: [
+            {
+              time: 0,
+              text: "欢迎来到科技聊天室，我是主播小明。今天我们有幸邀请到了OpenAI的研究科学家张博士，来和我们聊聊人工智能的未来发展。",
+            },
+            {
+              time: 15,
+              text: "大家好，很高兴能够参加这个节目。我是张博士，目前在OpenAI从事大语言模型的研究工作。",
+            },
+            {
+              time: 30,
+              text: "张博士，能否先为我们介绍一下GPT系列模型的发展历程？从GPT-1到现在的GPT-4，这中间经历了哪些重要的技术突破？",
+            },
+          ],
+
+          comments: [
+            {
+              id: 1,
+              userName: "AI研究者",
+              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+              content: "非常精彩的访谈！张博士对AGI发展路径的分析很有深度，特别是关于AI安全的讨论让我印象深刻。",
+              date: "2024-01-16",
+              timestamp: 1500,
+              likes: 42,
+              isLiked: false,
+            },
+            {
+              id: 2,
+              userName: "科技爱好者小王",
+              userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
+              content: "作为普通听众，我觉得这期节目把复杂的技术概念解释得很清楚，收获很大！",
+              date: "2024-01-16",
+              likes: 28,
+              isLiked: true,
+            },
+          ],
+
+          relatedEpisodes: [
+            {
+              id: 2,
+              title: "区块链技术深度解析：Web3时代的机遇与挑战",
+              description: "从技术角度深入理解区块链的原理和应用，探讨Web3时代的商业模式和发展机遇。",
+              image: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=400&h=400&fit=crop",
+              duration: 3240,
+              publishDate: "2024-01-08",
+              playCount: 4200,
+            },
+            {
+              id: 3,
+              title: "元宇宙技术栈分析：VR/AR技术的现状与前景",
+              description: "深入分析元宇宙背后的核心技术，包括虚拟现实、增强现实、3D引擎等技术的发展现状。",
+              image: "https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=400&h=400&fit=crop",
+              duration: 2760,
+              publishDate: "2024-01-01",
+              playCount: 3800,
+            },
+          ],
+
+          get topComments() {
+            return this.comments.sort((a, b) => b.likes - a.likes).slice(0, 3);
+          },
+
+          init() {
+            // 模拟播放进度
+            setInterval(() => {
+              if (this.isPlaying) {
+                this.currentTime += 1;
+                this.progress = this.currentTime / this.episode.duration;
+
+                if (this.currentTime >= this.episode.duration) {
+                  this.isPlaying = false;
+                }
+              }
+            }, 1000);
+          },
+
+          togglePlay() {
+            this.isPlaying = !this.isPlaying;
+          },
+
+          toggleFavorite() {
+            this.episode.isFavorite = !this.episode.isFavorite;
+            console.log(this.episode.isFavorite ? "已收藏" : "已取消收藏");
+          },
+
+          shareEpisode() {
+            console.log("分享单集");
+          },
+
+          subscribeToPodcast() {
+            this.episode.isSubscribed = !this.episode.isSubscribed;
+            console.log(this.episode.isSubscribed ? "已订阅播客" : "已取消订阅播客");
+          },
+
+          seekTo(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percent = (event.clientX - rect.left) / rect.width;
+            this.currentTime = percent * this.episode.duration;
+            this.progress = percent;
+          },
+
+          seekForward() {
+            this.currentTime = Math.min(this.currentTime + 30, this.episode.duration);
+            this.progress = this.currentTime / this.episode.duration;
+          },
+
+          seekBackward() {
+            this.currentTime = Math.max(this.currentTime - 30, 0);
+            this.progress = this.currentTime / this.episode.duration;
+          },
+
+          setPlaybackRate() {
+            console.log("设置播放速度:", this.playbackRate);
+          },
+
+          toggleMute() {
+            this.isMuted = !this.isMuted;
+          },
+
+          setVolume() {
+            console.log("设置音量:", this.volume);
+          },
+
+          downloadEpisode() {
+            console.log("下载单集");
+          },
+
+          jumpToChapter(time) {
+            this.currentTime = time;
+            this.progress = time / this.episode.duration;
+            console.log("跳转到章节:", this.formatTime(time));
+          },
+
+          jumpToTime(time) {
+            this.currentTime = time;
+            this.progress = time / this.episode.duration;
+          },
+
+          isCurrentChapter(chapterTime) {
+            return (
+              this.currentTime >= chapterTime &&
+              this.currentTime < (this.chapters.find((c) => c.time > chapterTime)?.time || this.episode.duration)
+            );
+          },
+
+          isCurrentSegment(segmentTime) {
+            return Math.abs(this.currentTime - segmentTime) < 5;
+          },
+
+          toggleTranscriptSync() {
+            this.transcriptSync = !this.transcriptSync;
+          },
+
+          searchTranscript() {
+            console.log("搜索文稿:", this.transcriptSearch);
+          },
+
+          submitComment() {
+            if (this.newComment.trim()) {
+              const comment = {
+                id: this.comments.length + 1,
+                userName: "当前用户",
+                userAvatar:
+                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+                content: this.newComment,
+                date: new Date().toISOString().split("T")[0],
+                timestamp: this.commentWithTimestamp ? this.currentTime : null,
+                likes: 0,
+                isLiked: false,
+              };
+
+              this.comments.unshift(comment);
+              this.newComment = "";
+              this.commentWithTimestamp = false;
+              console.log("评论已发布");
+            }
+          },
+
+          toggleCommentLike(comment) {
+            comment.isLiked = !comment.isLiked;
+            comment.likes += comment.isLiked ? 1 : -1;
+          },
+
+          loadMoreComments() {
+            console.log("加载更多评论");
+            this.hasMoreComments = false;
+          },
+
+          playRelatedEpisode(episode) {
+            console.log("播放相关单集:", episode.title);
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs.toString().padStart(2, "0")}`;
+          },
+
+          formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return "昨天";
+            if (diffDays < 7) return `${diffDays}天前`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+
+          formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+
+            if (hours > 0) {
+              return `${hours}小时${minutes}分钟`;
+            }
+            return `${minutes}分钟`;
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

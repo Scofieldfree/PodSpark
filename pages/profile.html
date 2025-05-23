@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人资料 - 小宇宙播客</title>
+    <meta name="description" content="用户个人资料页面，包含基本信息、偏好设置、听播统计、成就系统" />
+    <meta name="keywords" content="个人资料,用户设置,播客统计" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="profileApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">个人资料</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button
+              @click="editMode = !editMode"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+              :class="editMode 
+                ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                : 'bg-podcast-primary text-white hover:bg-podcast-secondary'"
+            >
+              <span x-text="editMode ? '保存' : '编辑'"></span>
+            </button>
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 主要内容区域 -->
+        <div class="lg:col-span-2 space-y-8">
+          <!-- 基本信息 -->
+          <section class="bg-white rounded-xl shadow-sm p-8">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-gray-900">基本信息</h2>
+              <span x-show="editMode" class="text-sm text-gray-500">编辑模式</span>
+            </div>
+
+            <div class="flex items-start space-x-8">
+              <!-- 头像 -->
+              <div class="relative">
+                <img
+                  :src="user.avatar"
+                  :alt="user.name"
+                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+                <button
+                  x-show="editMode"
+                  @click="changeAvatar"
+                  class="absolute bottom-0 right-0 w-10 h-10 bg-podcast-primary text-white rounded-full flex items-center justify-center hover:bg-podcast-secondary transition-colors shadow-lg"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    ></path>
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- 用户信息 -->
+              <div class="flex-1 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                    <input
+                      x-show="editMode"
+                      x-model="user.name"
+                      type="text"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                    />
+                    <div x-show="!editMode" class="text-lg font-semibold text-gray-900" x-text="user.name"></div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                    <input
+                      x-show="editMode"
+                      x-model="user.email"
+                      type="email"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                    />
+                    <div x-show="!editMode" class="text-gray-600" x-text="user.email"></div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                    <input
+                      x-show="editMode"
+                      x-model="user.phone"
+                      type="tel"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                    />
+                    <div x-show="!editMode" class="text-gray-600" x-text="user.phone"></div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">生日</label>
+                    <input
+                      x-show="editMode"
+                      x-model="user.birthday"
+                      type="date"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                    />
+                    <div x-show="!editMode" class="text-gray-600" x-text="formatDate(user.birthday)"></div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">个人简介</label>
+                  <textarea
+                    x-show="editMode"
+                    x-model="user.bio"
+                    rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                    placeholder="介绍一下你自己..."
+                  ></textarea>
+                  <div x-show="!editMode" class="text-gray-600" x-text="user.bio || '还没有添加个人简介'"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 听播统计 -->
+          <section class="bg-white rounded-xl shadow-sm p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">听播统计</h2>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+              <div class="text-center">
+                <div
+                  class="w-16 h-16 bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-full flex items-center justify-center mx-auto mb-3"
+                >
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M8.464 8.464a5 5 0 000 7.072m-2.828-9.9a9 9 0 000 14.142"
+                    ></path>
+                  </svg>
+                </div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.totalListeningTime"></div>
+                <div class="text-sm text-gray-600">总听播时长</div>
+              </div>
+
+              <div class="text-center">
+                <div
+                  class="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                >
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    ></path>
+                  </svg>
+                </div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.episodesListened"></div>
+                <div class="text-sm text-gray-600">收听单集数</div>
+              </div>
+
+              <div class="text-center">
+                <div
+                  class="w-16 h-16 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                >
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.podcastsSubscribed"></div>
+                <div class="text-sm text-gray-600">订阅播客数</div>
+              </div>
+
+              <div class="text-center">
+                <div
+                  class="w-16 h-16 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3"
+                >
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                </div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.averageDaily"></div>
+                <div class="text-sm text-gray-600">日均听播时长</div>
+              </div>
+            </div>
+
+            <!-- 听播趋势图 -->
+            <div class="border border-gray-200 rounded-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">近30天听播趋势</h3>
+              <div class="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
+                <div class="text-center text-gray-500">
+                  <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    ></path>
+                  </svg>
+                  <p>图表数据可视化</p>
+                  <p class="text-sm">显示每日听播时长变化</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 成就系统 -->
+          <section class="bg-white rounded-xl shadow-sm p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">成就徽章</h2>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <template x-for="achievement in achievements" :key="achievement.id">
+                <div
+                  class="relative p-4 border rounded-xl transition-all hover:shadow-md cursor-pointer"
+                  :class="achievement.unlocked 
+                    ? 'border-podcast-primary bg-podcast-primary/5' 
+                    : 'border-gray-200 bg-gray-50 opacity-60'"
+                  @click="showAchievementDetail(achievement)"
+                >
+                  <div class="text-center">
+                    <div
+                      class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2"
+                      :class="achievement.unlocked ? 'bg-podcast-primary text-white' : 'bg-gray-300 text-gray-500'"
+                    >
+                      <span class="text-2xl" x-text="achievement.icon"></span>
+                    </div>
+                    <h3 class="font-semibold text-sm mb-1" x-text="achievement.title"></h3>
+                    <p class="text-xs text-gray-600" x-text="achievement.description"></p>
+
+                    <!-- 进度条 -->
+                    <div x-show="!achievement.unlocked && achievement.progress !== undefined" class="mt-2">
+                      <div class="w-full bg-gray-200 rounded-full h-1">
+                        <div
+                          class="bg-podcast-primary h-1 rounded-full transition-all"
+                          :style="`width: ${achievement.progress}%`"
+                        ></div>
+                      </div>
+                      <div
+                        class="text-xs text-gray-500 mt-1"
+                        x-text="`${achievement.current}/${achievement.target}`"
+                      ></div>
+                    </div>
+
+                    <!-- 解锁时间 -->
+                    <div
+                      x-show="achievement.unlocked"
+                      class="text-xs text-podcast-primary mt-1"
+                      x-text="formatDate(achievement.unlockedAt)"
+                    ></div>
+                  </div>
+
+                  <!-- 新解锁标识 -->
+                  <div
+                    x-show="achievement.isNew"
+                    class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"
+                  ></div>
+                </div>
+              </template>
+            </div>
+          </section>
+
+          <!-- 偏好设置 -->
+          <section class="bg-white rounded-xl shadow-sm p-8">
+            <h2 class="text-xl font-bold text-gray-900 mb-6">偏好设置</h2>
+
+            <div class="space-y-6">
+              <!-- 音频设置 -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">音频设置</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">默认播放速度</label>
+                    <select
+                      x-model="preferences.defaultPlaybackSpeed"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+                    >
+                      <option value="0.5">0.5x</option>
+                      <option value="0.75">0.75x</option>
+                      <option value="1">1x</option>
+                      <option value="1.25">1.25x</option>
+                      <option value="1.5">1.5x</option>
+                      <option value="2">2x</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">音频质量</label>
+                    <select
+                      x-model="preferences.audioQuality"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+                    >
+                      <option value="low">低质量 (64kbps)</option>
+                      <option value="medium">中等质量 (128kbps)</option>
+                      <option value="high">高质量 (320kbps)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 通知设置 -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">通知设置</h3>
+                <div class="space-y-3">
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      x-model="preferences.newEpisodeNotification"
+                      class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                    />
+                    <span class="ml-3 text-gray-700">新单集发布通知</span>
+                  </label>
+
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      x-model="preferences.weeklyDigest"
+                      class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                    />
+                    <span class="ml-3 text-gray-700">每周推荐摘要</span>
+                  </label>
+
+                  <label class="flex items-center">
+                    <input
+                      type="checkbox"
+                      x-model="preferences.socialNotification"
+                      class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                    />
+                    <span class="ml-3 text-gray-700">社交互动通知</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 下载设置 -->
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">下载设置</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">自动下载</label>
+                    <select
+                      x-model="preferences.autoDownload"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+                    >
+                      <option value="none">不自动下载</option>
+                      <option value="subscribed">仅订阅的播客</option>
+                      <option value="favorites">仅收藏的播客</option>
+                      <option value="all">所有播客</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">仅在WiFi下载</label>
+                    <label class="flex items-center mt-2">
+                      <input
+                        type="checkbox"
+                        x-model="preferences.wifiOnlyDownload"
+                        class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                      />
+                      <span class="ml-3 text-gray-700">启用</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- 会员状态 -->
+          <div class="bg-gradient-to-r from-podcast-primary to-podcast-secondary rounded-xl shadow-sm p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">会员状态</h3>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+                ></path>
+              </svg>
+            </div>
+
+            <div x-show="user.isPremium">
+              <div class="text-sm opacity-90 mb-2">小宇宙 Pro 会员</div>
+              <div class="text-xs opacity-75" x-text="`到期时间：${user.premiumExpiry}`"></div>
+              <button
+                class="w-full mt-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+              >
+                管理订阅
+              </button>
+            </div>
+
+            <div x-show="!user.isPremium">
+              <div class="text-sm opacity-90 mb-2">免费用户</div>
+              <div class="text-xs opacity-75 mb-4">升级到Pro享受更多功能</div>
+              <button
+                class="w-full px-4 py-2 bg-white text-podcast-primary rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                立即升级
+              </button>
+            </div>
+          </div>
+
+          <!-- 快速操作 -->
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">快速操作</h3>
+            <div class="space-y-3">
+              <button
+                @click="exportData"
+                class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+              >
+                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  ></path>
+                </svg>
+                <div>
+                  <div class="font-medium text-gray-900">导出数据</div>
+                  <div class="text-sm text-gray-500">下载个人听播数据</div>
+                </div>
+              </button>
+
+              <button
+                @click="importData"
+                class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+              >
+                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  ></path>
+                </svg>
+                <div>
+                  <div class="font-medium text-gray-900">导入订阅</div>
+                  <div class="text-sm text-gray-500">从其他平台导入</div>
+                </div>
+              </button>
+
+              <button
+                @click="shareProfile"
+                class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+              >
+                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                  ></path>
+                </svg>
+                <div>
+                  <div class="font-medium text-gray-900">分享资料</div>
+                  <div class="text-sm text-gray-500">生成个人资料卡片</div>
+                </div>
+              </button>
+
+              <button
+                @click="privacySettings"
+                class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+              >
+                <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  ></path>
+                </svg>
+                <div>
+                  <div class="font-medium text-gray-900">隐私设置</div>
+                  <div class="text-sm text-gray-500">管理个人信息可见性</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- 最近活动 -->
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">最近活动</h3>
+            <div class="space-y-4">
+              <template x-for="activity in recentActivities" :key="activity.id">
+                <div class="flex items-start space-x-3">
+                  <div
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-xs text-white"
+                    :class="getActivityColor(activity.type)"
+                  >
+                    <span x-text="getActivityIcon(activity.type)"></span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-gray-900" x-text="activity.description"></p>
+                    <p class="text-xs text-gray-500" x-text="formatRelativeTime(activity.time)"></p>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 成就详情模态框 -->
+    <div
+      x-show="showAchievementModal"
+      x-cloak
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      @click.self="showAchievementModal = false"
+    >
+      <div class="bg-white rounded-xl w-full max-w-md">
+        <div class="p-6">
+          <div class="text-center">
+            <div
+              class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+              :class="selectedAchievement?.unlocked ? 'bg-podcast-primary text-white' : 'bg-gray-300 text-gray-500'"
+            >
+              <span class="text-3xl" x-text="selectedAchievement?.icon"></span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="selectedAchievement?.title"></h3>
+            <p class="text-gray-600 mb-4" x-text="selectedAchievement?.description"></p>
+
+            <div x-show="selectedAchievement?.unlocked" class="text-sm text-podcast-primary">
+              <p x-text="`解锁时间：${formatDate(selectedAchievement?.unlockedAt)}`"></p>
+            </div>
+
+            <div x-show="!selectedAchievement?.unlocked && selectedAchievement?.progress !== undefined" class="mt-4">
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div
+                  class="bg-podcast-primary h-2 rounded-full transition-all"
+                  :style="`width: ${selectedAchievement?.progress}%`"
+                ></div>
+              </div>
+              <p
+                class="text-sm text-gray-600"
+                x-text="`进度：${selectedAchievement?.current}/${selectedAchievement?.target}`"
+              ></p>
+            </div>
+          </div>
+
+          <button
+            @click="showAchievementModal = false"
+            class="w-full mt-6 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            关闭
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function profileApp() {
+        return {
+          editMode: false,
+          showAchievementModal: false,
+          selectedAchievement: null,
+
+          user: {
+            name: "小宇宙探索者",
+            email: "explorer@xiaoyuzhou.app",
+            phone: "138****8888",
+            birthday: "1995-06-15",
+            bio: "热爱科技和创新的播客听众，喜欢在播客中探索新的知识和观点。",
+            avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop&crop=face",
+            isPremium: true,
+            premiumExpiry: "2024-12-31",
+            joinDate: "2023-01-15",
+          },
+
+          stats: {
+            totalListeningTime: "156小时",
+            episodesListened: 324,
+            podcastsSubscribed: 28,
+            averageDaily: "2.3小时",
+          },
+
+          preferences: {
+            defaultPlaybackSpeed: 1.25,
+            audioQuality: "high",
+            newEpisodeNotification: true,
+            weeklyDigest: true,
+            socialNotification: false,
+            autoDownload: "subscribed",
+            wifiOnlyDownload: true,
+          },
+
+          achievements: [
+            {
+              id: 1,
+              title: "播客新手",
+              description: "收听第一个播客单集",
+              icon: "🎧",
+              unlocked: true,
+              unlockedAt: "2023-01-16",
+              isNew: false,
+            },
+            {
+              id: 2,
+              title: "时光旅行者",
+              description: "累计收听100小时",
+              icon: "⏰",
+              unlocked: true,
+              unlockedAt: "2023-08-20",
+              isNew: false,
+            },
+            {
+              id: 3,
+              title: "探索家",
+              description: "订阅10个不同的播客",
+              icon: "🔍",
+              unlocked: true,
+              unlockedAt: "2023-05-10",
+              isNew: false,
+            },
+            {
+              id: 4,
+              title: "评论达人",
+              description: "发表50条评论",
+              icon: "💬",
+              unlocked: false,
+              progress: 76,
+              current: 38,
+              target: 50,
+              isNew: false,
+            },
+            {
+              id: 5,
+              title: "深度听众",
+              description: "单日收听超过8小时",
+              icon: "🎯",
+              unlocked: true,
+              unlockedAt: "2024-01-01",
+              isNew: true,
+            },
+            {
+              id: 6,
+              title: "社交达人",
+              description: "获得100个点赞",
+              icon: "👍",
+              unlocked: false,
+              progress: 60,
+              current: 60,
+              target: 100,
+              isNew: false,
+            },
+            {
+              id: 7,
+              title: "忠实粉丝",
+              description: "连续30天收听播客",
+              icon: "🔥",
+              unlocked: false,
+              progress: 83,
+              current: 25,
+              target: 30,
+              isNew: false,
+            },
+            {
+              id: 8,
+              title: "知识收藏家",
+              description: "收藏100个单集",
+              icon: "📚",
+              unlocked: false,
+              progress: 45,
+              current: 45,
+              target: 100,
+              isNew: false,
+            },
+          ],
+
+          recentActivities: [
+            {
+              id: 1,
+              type: "listen",
+              description: "收听了《科技聊天室》最新一期",
+              time: "2024-01-20T10:30:00Z",
+            },
+            {
+              id: 2,
+              type: "subscribe",
+              description: "订阅了《商业新视角》",
+              time: "2024-01-19T15:20:00Z",
+            },
+            {
+              id: 3,
+              type: "favorite",
+              description: "收藏了《人工智能的未来展望》",
+              time: "2024-01-19T09:15:00Z",
+            },
+            {
+              id: 4,
+              type: "comment",
+              description: "在《区块链技术深度解析》发表了评论",
+              time: "2024-01-18T20:45:00Z",
+            },
+            {
+              id: 5,
+              type: "achievement",
+              description: "解锁了"深度听众"成就",
+              time: "2024-01-18T12:00:00Z",
+            },
+          ],
+
+          changeAvatar() {
+            console.log("更换头像");
+          },
+
+          showAchievementDetail(achievement) {
+            this.selectedAchievement = achievement;
+            this.showAchievementModal = true;
+          },
+
+          exportData() {
+            console.log("导出个人数据");
+          },
+
+          importData() {
+            console.log("导入订阅数据");
+          },
+
+          shareProfile() {
+            console.log("分享个人资料");
+          },
+
+          privacySettings() {
+            console.log("隐私设置");
+          },
+
+          getActivityColor(type) {
+            const colors = {
+              listen: "bg-podcast-primary",
+              subscribe: "bg-green-500",
+              favorite: "bg-red-500",
+              comment: "bg-blue-500",
+              achievement: "bg-yellow-500",
+            };
+            return colors[type] || "bg-gray-500";
+          },
+
+          getActivityIcon(type) {
+            const icons = {
+              listen: "🎧",
+              subscribe: "➕",
+              favorite: "❤️",
+              comment: "💬",
+              achievement: "🏆",
+            };
+            return icons[type] || "📝";
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatDate(dateString) {
+            if (!dateString) return "";
+            const date = new Date(dateString);
+            return date.toLocaleDateString("zh-CN");
+          },
+
+          formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+
+            if (diffMinutes < 60) return `${diffMinutes}分钟前`;
+            if (diffHours < 24) return `${diffHours}小时前`;
+            if (diffDays < 7) return `${diffDays}天前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>社区 - 小宇宙播客</title>
+    <meta name="description" content="播客社区页面，包含用户动态、讨论区、热门话题" />
+    <meta name="keywords" content="播客社区,用户动态,讨论区,热门话题" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="communityApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">播客社区</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button
+              @click="showNewPostModal = true"
+              class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors text-sm"
+            >
+              发布动态
+            </button>
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 01-7.5-7.5H7.5a7.5 7.5 0 017.5 7.5v5z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- 主要内容区域 -->
+        <div class="lg:col-span-3">
+          <!-- 标签导航 -->
+          <div class="flex space-x-1 mb-6">
+            <button
+              @click="activeTab = 'feed'"
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'feed' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+            >
+              动态
+            </button>
+            <button
+              @click="activeTab = 'topics'"
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'topics' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+            >
+              话题
+            </button>
+            <button
+              @click="activeTab = 'discussions'"
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'discussions' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+            >
+              讨论
+            </button>
+            <button
+              @click="activeTab = 'events'"
+              class="px-4 py-2 rounded-lg font-medium transition-colors"
+              :class="activeTab === 'events' ? 'bg-podcast-primary text-white' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'"
+            >
+              活动
+            </button>
+          </div>
+
+          <!-- 动态流 -->
+          <div x-show="activeTab === 'feed'" class="space-y-6">
+            <template x-for="post in posts" :key="post.id">
+              <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                <!-- 用户信息 -->
+                <div class="flex items-start space-x-4">
+                  <img :src="post.userAvatar" :alt="post.userName" class="w-12 h-12 rounded-full object-cover" />
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="font-semibold text-gray-900" x-text="post.userName"></h3>
+                        <p class="text-sm text-gray-500" x-text="formatRelativeTime(post.createdAt)"></p>
+                      </div>
+                      <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                            ></path>
+                          </svg>
+                        </button>
+                        <div
+                          x-show="open"
+                          @click.away="open = false"
+                          x-transition
+                          class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                        >
+                          <div class="py-1">
+                            <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                              举报
+                            </button>
+                            <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                              屏蔽
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 动态内容 -->
+                    <div class="mt-4">
+                      <p class="text-gray-900 mb-4" x-text="post.content"></p>
+
+                      <!-- 关联播客 -->
+                      <div x-show="post.podcast" class="bg-gray-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center space-x-3">
+                          <img
+                            :src="post.podcast?.image"
+                            :alt="post.podcast?.title"
+                            class="w-12 h-12 rounded-lg object-cover"
+                          />
+                          <div>
+                            <h4 class="font-medium text-gray-900" x-text="post.podcast?.title"></h4>
+                            <p class="text-sm text-gray-600" x-text="post.podcast?.author"></p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 图片 -->
+                      <div x-show="post.images && post.images.length > 0" class="grid grid-cols-2 gap-2 mb-4">
+                        <template x-for="image in post.images" :key="image">
+                          <img
+                            :src="image"
+                            class="rounded-lg object-cover h-32 w-full cursor-pointer"
+                            @click="showImageModal(image)"
+                          />
+                        </template>
+                      </div>
+
+                      <!-- 话题标签 -->
+                      <div x-show="post.tags && post.tags.length > 0" class="flex flex-wrap gap-2 mb-4">
+                        <template x-for="tag in post.tags" :key="tag">
+                          <span
+                            class="px-2 py-1 text-sm bg-podcast-primary/10 text-podcast-primary rounded-full"
+                            x-text="`#${tag}`"
+                          ></span>
+                        </template>
+                      </div>
+                    </div>
+
+                    <!-- 互动按钮 -->
+                    <div class="flex items-center space-x-6 pt-4 border-t border-gray-100">
+                      <button
+                        @click="toggleLike(post)"
+                        class="flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors"
+                        :class="post.isLiked ? 'text-red-500' : ''"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          :fill="post.isLiked ? 'currentColor' : 'none'"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                          ></path>
+                        </svg>
+                        <span x-text="post.likes"></span>
+                      </button>
+
+                      <button
+                        @click="showComments(post)"
+                        class="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.906-1.306L6 21l1.306-2.094A9.863 9.863 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"
+                          ></path>
+                        </svg>
+                        <span x-text="post.comments"></span>
+                      </button>
+
+                      <button
+                        @click="sharePost(post)"
+                        class="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                          ></path>
+                        </svg>
+                        <span x-text="post.shares"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- 热门话题 -->
+          <div x-show="activeTab === 'topics'" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h2 class="text-xl font-bold text-gray-900 mb-6">热门话题</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <template x-for="topic in hotTopics" :key="topic.id">
+                  <div
+                    class="p-4 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors cursor-pointer"
+                    @click="viewTopic(topic)"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <h3 class="font-semibold text-gray-900" x-text="`#${topic.name}`"></h3>
+                      <span class="text-xs px-2 py-1 bg-red-100 text-red-600 rounded-full">热</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3" x-text="topic.description"></p>
+                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                      <span x-text="`${topic.postCount} 条动态`"></span>
+                      <span x-text="`${topic.participantCount} 人参与`"></span>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- 讨论区 -->
+          <div x-show="activeTab === 'discussions'" class="space-y-6">
+            <template x-for="discussion in discussions" :key="discussion.id">
+              <div
+                class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
+                @click="viewDiscussion(discussion)"
+              >
+                <div class="flex items-start space-x-4">
+                  <img
+                    :src="discussion.userAvatar"
+                    :alt="discussion.userName"
+                    class="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 mb-2" x-text="discussion.title"></h3>
+                    <p class="text-gray-600 text-sm mb-3 line-clamp-2" x-text="discussion.content"></p>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                      <span x-text="discussion.userName"></span>
+                      <span x-text="formatRelativeTime(discussion.createdAt)"></span>
+                      <span x-text="`${discussion.replies} 回复`"></span>
+                      <span x-text="`${discussion.views} 浏览`"></span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-medium text-gray-900" x-text="discussion.replies"></div>
+                    <div class="text-xs text-gray-500">回复</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- 活动 -->
+          <div x-show="activeTab === 'events'" class="space-y-6">
+            <template x-for="event in events" :key="event.id">
+              <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <img :src="event.image" :alt="event.title" class="w-full h-48 object-cover" />
+                <div class="p-6">
+                  <div class="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 class="text-xl font-bold text-gray-900 mb-2" x-text="event.title"></h3>
+                      <p class="text-gray-600" x-text="event.description"></p>
+                    </div>
+                    <span
+                      class="px-3 py-1 text-sm font-medium rounded-full"
+                      :class="event.status === 'upcoming' ? 'bg-blue-100 text-blue-800' : 
+                               event.status === 'ongoing' ? 'bg-green-100 text-green-800' : 
+                               'bg-gray-100 text-gray-800'"
+                      x-text="event.status === 'upcoming' ? '即将开始' : 
+                               event.status === 'ongoing' ? '进行中' : '已结束'"
+                    ></span>
+                  </div>
+
+                  <div class="flex items-center space-x-6 text-sm text-gray-500 mb-4">
+                    <div class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      <span x-text="formatDate(event.date)"></span>
+                    </div>
+                    <div class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        ></path>
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        ></path>
+                      </svg>
+                      <span x-text="event.location"></span>
+                    </div>
+                    <div class="flex items-center">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                        ></path>
+                      </svg>
+                      <span x-text="`${event.participants} 人参加`"></span>
+                    </div>
+                  </div>
+
+                  <div class="flex space-x-3">
+                    <button
+                      @click="joinEvent(event)"
+                      class="flex-1 px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                      :disabled="event.status === 'ended'"
+                    >
+                      <span x-text="event.isJoined ? '已参加' : '参加活动'"></span>
+                    </button>
+                    <button
+                      @click="shareEvent(event)"
+                      class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      分享
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- 社区统计 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">社区动态</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">今日新增</span>
+                  <span class="font-semibold text-green-600">+125</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">活跃用户</span>
+                  <span class="font-semibold text-blue-600">2,341</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">热门话题</span>
+                  <span class="font-semibold text-orange-600">18</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">在线活动</span>
+                  <span class="font-semibold text-purple-600">3</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 推荐用户 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">推荐关注</h3>
+              <div class="space-y-4">
+                <template x-for="user in recommendedUsers" :key="user.id">
+                  <div class="flex items-center space-x-3">
+                    <img :src="user.avatar" :alt="user.name" class="w-10 h-10 rounded-full object-cover" />
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-medium text-gray-900 line-clamp-1" x-text="user.name"></h4>
+                      <p class="text-sm text-gray-500" x-text="`${user.followers} 关注者`"></p>
+                    </div>
+                    <button
+                      @click="followUser(user)"
+                      class="px-3 py-1 text-sm bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                      :class="user.isFollowed ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : ''"
+                    >
+                      <span x-text="user.isFollowed ? '已关注' : '关注'"></span>
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 话题趋势 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">话题趋势</h3>
+              <div class="space-y-3">
+                <template x-for="(trend, index) in trendingTopics" :key="trend.id">
+                  <div class="flex items-center space-x-3">
+                    <span
+                      class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600"
+                      x-text="index + 1"
+                    ></span>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-medium text-gray-900" x-text="`#${trend.name}`"></h4>
+                      <p class="text-sm text-gray-500" x-text="`${trend.count} 条讨论`"></p>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 即将到来的活动 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">即将到来</h3>
+              <div class="space-y-4">
+                <template x-for="event in upcomingEvents" :key="event.id">
+                  <div
+                    class="border border-gray-200 rounded-lg p-3 hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors cursor-pointer"
+                  >
+                    <h4 class="font-medium text-gray-900 mb-1" x-text="event.title"></h4>
+                    <p class="text-sm text-gray-600 mb-2" x-text="formatDate(event.date)"></p>
+                    <div class="text-xs text-podcast-primary font-medium" x-text="`${event.participants} 人参加`"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 发布动态模态框 -->
+    <div
+      x-show="showNewPostModal"
+      x-cloak
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      @click.self="showNewPostModal = false"
+    >
+      <div class="bg-white rounded-xl w-full max-w-lg">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">发布动态</h3>
+            <button @click="showNewPostModal = false" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <textarea
+              x-model="newPostContent"
+              rows="4"
+              placeholder="分享你的想法..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent resize-none"
+            ></textarea>
+
+            <div class="flex items-center space-x-4">
+              <button class="flex items-center text-gray-500 hover:text-gray-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                图片
+              </button>
+              <button class="flex items-center text-gray-500 hover:text-gray-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m-6 0h6m0 0v12a2 2 0 01-2 2H9a2 2 0 01-2-2V4m6 0a2 2 0 012 2v12a2 2 0 01-2 2H9a2 2 0 01-2-2V4a2 2 0 012-2z"
+                  ></path>
+                </svg>
+                播客
+              </button>
+              <button class="flex items-center text-gray-500 hover:text-gray-700">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                  ></path>
+                </svg>
+                话题
+              </button>
+            </div>
+          </div>
+
+          <div class="flex space-x-3 mt-6">
+            <button
+              @click="showNewPostModal = false"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              取消
+            </button>
+            <button
+              @click="publishPost"
+              class="flex-1 px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+              :disabled="!newPostContent.trim()"
+            >
+              发布
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function communityApp() {
+        return {
+          activeTab: "feed",
+          showNewPostModal: false,
+          newPostContent: "",
+
+          posts: [
+            {
+              id: 1,
+              userName: "播客爱好者",
+              userAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=100&h=100&fit=crop&crop=face",
+              content:
+                "刚听完《科技聊天室》的最新一期，关于人工智能的讨论太精彩了！特别是关于AGI发展路径的分析，让我对AI的未来有了更深的理解。",
+              createdAt: "2024-01-20T10:30:00Z",
+              likes: 24,
+              comments: 8,
+              shares: 3,
+              isLiked: false,
+              tags: ["人工智能", "科技", "AGI"],
+              podcast: {
+                title: "科技聊天室",
+                author: "科技小栈",
+                image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+              },
+            },
+            {
+              id: 2,
+              userName: "创业者小王",
+              userAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+              content: "今天参加了一个播客分享会，遇到了很多志同道合的朋友。播客真的是一个很好的学习和交流平台！",
+              createdAt: "2024-01-19T15:20:00Z",
+              likes: 18,
+              comments: 5,
+              shares: 2,
+              isLiked: true,
+              tags: ["播客", "分享会", "学习"],
+              images: ["https://images.unsplash.com/photo-1515169067868-5387ec377fde?w=400&h=300&fit=crop"],
+            },
+            {
+              id: 3,
+              userName: "历史迷",
+              userAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+              content: "推荐一下《历史深度》这个播客，主播讲历史的方式很有趣，让复杂的历史事件变得生动易懂。",
+              createdAt: "2024-01-19T09:15:00Z",
+              likes: 32,
+              comments: 12,
+              shares: 7,
+              isLiked: false,
+              tags: ["历史", "播客推荐"],
+            },
+          ],
+
+          hotTopics: [
+            {
+              id: 1,
+              name: "人工智能",
+              description: "讨论AI技术发展、应用场景和未来前景",
+              postCount: 234,
+              participantCount: 1567,
+            },
+            {
+              id: 2,
+              name: "播客推荐",
+              description: "分享和推荐优质播客节目",
+              postCount: 189,
+              participantCount: 892,
+            },
+            {
+              id: 3,
+              name: "创业故事",
+              description: "分享创业经历和商业洞察",
+              postCount: 156,
+              participantCount: 734,
+            },
+            {
+              id: 4,
+              name: "科技趋势",
+              description: "探讨最新科技发展趋势",
+              postCount: 143,
+              participantCount: 651,
+            },
+          ],
+
+          discussions: [
+            {
+              id: 1,
+              title: "如何评价当前播客行业的发展现状？",
+              content: "最近播客越来越火，想听听大家对行业现状的看法...",
+              userName: "播客观察者",
+              userAvatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+              createdAt: "2024-01-20T08:30:00Z",
+              replies: 23,
+              views: 156,
+            },
+            {
+              id: 2,
+              title: "推荐几个适合晚上听的轻松播客？",
+              content: "想找一些轻松的播客在睡前听，有什么推荐吗？",
+              userName: "夜猫子",
+              userAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
+              createdAt: "2024-01-19T22:15:00Z",
+              replies: 18,
+              views: 89,
+            },
+          ],
+
+          events: [
+            {
+              id: 1,
+              title: "2024播客创作者大会",
+              description: "汇聚全国优秀播客创作者，分享创作经验和行业趋势",
+              image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop",
+              date: "2024-03-15",
+              location: "北京国际会议中心",
+              participants: 1250,
+              status: "upcoming",
+              isJoined: false,
+            },
+            {
+              id: 2,
+              title: "播客新手训练营",
+              description: "面向播客新手的免费培训活动，从零开始学习播客制作",
+              image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=300&fit=crop",
+              date: "2024-02-20",
+              location: "线上直播",
+              participants: 567,
+              status: "ongoing",
+              isJoined: true,
+            },
+          ],
+
+          recommendedUsers: [
+            {
+              id: 1,
+              name: "播客导师",
+              avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+              followers: 1234,
+              isFollowed: false,
+            },
+            {
+              id: 2,
+              name: "科技评论家",
+              avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+              followers: 892,
+              isFollowed: false,
+            },
+            {
+              id: 3,
+              name: "创业分享者",
+              avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+              followers: 567,
+              isFollowed: true,
+            },
+          ],
+
+          trendingTopics: [
+            { id: 1, name: "ChatGPT", count: 456 },
+            { id: 2, name: "创业", count: 234 },
+            { id: 3, name: "播客制作", count: 189 },
+            { id: 4, name: "投资理财", count: 156 },
+            { id: 5, name: "职场发展", count: 123 },
+          ],
+
+          upcomingEvents: [
+            {
+              id: 1,
+              title: "播客创作分享会",
+              date: "2024-01-25",
+              participants: 89,
+            },
+            {
+              id: 2,
+              title: "科技播客论坛",
+              date: "2024-02-01",
+              participants: 156,
+            },
+            {
+              id: 3,
+              title: "商业播客峰会",
+              date: "2024-02-10",
+              participants: 234,
+            },
+          ],
+
+          toggleLike(post) {
+            post.isLiked = !post.isLiked;
+            post.likes += post.isLiked ? 1 : -1;
+          },
+
+          showComments(post) {
+            console.log("查看评论:", post.id);
+          },
+
+          sharePost(post) {
+            console.log("分享动态:", post.id);
+          },
+
+          publishPost() {
+            if (this.newPostContent.trim()) {
+              const newPost = {
+                id: this.posts.length + 1,
+                userName: "当前用户",
+                userAvatar:
+                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+                content: this.newPostContent,
+                createdAt: new Date().toISOString(),
+                likes: 0,
+                comments: 0,
+                shares: 0,
+                isLiked: false,
+                tags: [],
+              };
+
+              this.posts.unshift(newPost);
+              this.newPostContent = "";
+              this.showNewPostModal = false;
+              console.log("动态已发布");
+            }
+          },
+
+          viewTopic(topic) {
+            console.log("查看话题:", topic.name);
+          },
+
+          viewDiscussion(discussion) {
+            console.log("查看讨论:", discussion.title);
+          },
+
+          joinEvent(event) {
+            event.isJoined = !event.isJoined;
+            event.participants += event.isJoined ? 1 : -1;
+            console.log(event.isJoined ? "已参加活动" : "已取消参加", event.title);
+          },
+
+          shareEvent(event) {
+            console.log("分享活动:", event.title);
+          },
+
+          followUser(user) {
+            user.isFollowed = !user.isFollowed;
+            user.followers += user.isFollowed ? 1 : -1;
+            console.log(user.isFollowed ? "已关注" : "已取消关注", user.name);
+          },
+
+          showImageModal(image) {
+            console.log("查看图片:", image);
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString("zh-CN");
+          },
+
+          formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+
+            if (diffMinutes < 60) return `${diffMinutes}分钟前`;
+            if (diffHours < 24) return `${diffHours}小时前`;
+            if (diffDays < 7) return `${diffDays}天前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+        };
+      }
+    </script>
+  </body>
+</html>

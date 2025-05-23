@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>订阅管理 - 小宇宙播客</title>
+    <meta name="description" content="播客订阅管理页面，管理已订阅的播客和通知设置" />
+    <meta name="keywords" content="订阅管理,播客订阅,通知设置" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="../assets/css/custom.css" />
+    <link rel="icon" type="image/svg+xml" href="https://api.iconify.design/heroicons/musical-note.svg" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "podcast-primary": "#6366f1",
+              "podcast-secondary": "#8b5cf6",
+              "podcast-accent": "#06b6d4",
+              "podcast-dark": "#1e293b",
+              "podcast-light": "#f8fafc",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-gray-50 min-h-screen" x-data="subscriptionApp()">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-4">
+            <button @click="goBack" class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+              </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">订阅管理</h1>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button
+              @click="showImportModal = true"
+              class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors text-sm"
+            >
+              导入订阅
+            </button>
+            <button class="text-gray-600 hover:text-gray-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- 主要内容区域 -->
+        <div class="lg:col-span-3">
+          <!-- 订阅统计 -->
+          <section class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div class="text-center">
+                <div class="text-2xl font-bold text-podcast-primary" x-text="subscriptions.length"></div>
+                <div class="text-sm text-gray-600">总订阅数</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-green-600" x-text="activeSubscriptions"></div>
+                <div class="text-sm text-gray-600">活跃播客</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600" x-text="unreadEpisodes"></div>
+                <div class="text-sm text-gray-600">未听单集</div>
+              </div>
+              <div class="text-center">
+                <div class="text-2xl font-bold text-orange-600" x-text="notificationEnabled"></div>
+                <div class="text-sm text-gray-600">开启通知</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 工具栏 -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+            <div class="flex items-center space-x-4">
+              <div class="relative">
+                <input
+                  type="text"
+                  placeholder="搜索订阅的播客..."
+                  x-model="searchQuery"
+                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+                />
+                <svg
+                  class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  ></path>
+                </svg>
+              </div>
+
+              <select
+                x-model="filterBy"
+                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+              >
+                <option value="all">所有订阅</option>
+                <option value="active">活跃播客</option>
+                <option value="paused">暂停更新</option>
+                <option value="notifications">开启通知</option>
+              </select>
+
+              <select
+                x-model="sortBy"
+                class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary"
+              >
+                <option value="recent">最近订阅</option>
+                <option value="alphabetical">按名称排序</option>
+                <option value="activity">按活跃度</option>
+                <option value="unread">按未读数量</option>
+              </select>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button
+                @click="selectAll"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                全选
+              </button>
+              <button
+                @click="showBatchActions = !showBatchActions"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                :class="selectedSubscriptions.length > 0 ? 'bg-podcast-primary/10 border-podcast-primary text-podcast-primary' : ''"
+              >
+                批量操作 (<span x-text="selectedSubscriptions.length"></span>)
+              </button>
+              <button
+                @click="exportSubscriptions"
+                class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                导出
+              </button>
+            </div>
+          </div>
+
+          <!-- 批量操作面板 -->
+          <div
+            x-show="showBatchActions && selectedSubscriptions.length > 0"
+            class="bg-white rounded-xl shadow-sm p-4 mb-6"
+          >
+            <div class="flex items-center space-x-4">
+              <span class="text-sm font-medium text-gray-700">批量操作:</span>
+              <button
+                @click="batchEnableNotifications"
+                class="px-3 py-2 text-sm bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+              >
+                开启通知
+              </button>
+              <button
+                @click="batchDisableNotifications"
+                class="px-3 py-2 text-sm bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors"
+              >
+                关闭通知
+              </button>
+              <button
+                @click="batchUnsubscribe"
+                class="px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+              >
+                取消订阅
+              </button>
+              <button
+                @click="batchMarkAsRead"
+                class="px-3 py-2 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                标记已读
+              </button>
+            </div>
+          </div>
+
+          <!-- 订阅列表 -->
+          <div class="space-y-4">
+            <template x-for="subscription in filteredSubscriptions" :key="subscription.id">
+              <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="p-6">
+                  <div class="flex items-start space-x-4">
+                    <!-- 选择框 -->
+                    <div class="flex items-center pt-2">
+                      <input
+                        type="checkbox"
+                        :value="subscription.id"
+                        x-model="selectedSubscriptions"
+                        class="rounded border-gray-300 text-podcast-primary focus:ring-podcast-primary"
+                      />
+                    </div>
+
+                    <!-- 播客封面 -->
+                    <div class="relative">
+                      <img
+                        :src="subscription.image"
+                        :alt="subscription.title"
+                        class="w-20 h-20 rounded-xl object-cover"
+                      />
+                      <div
+                        x-show="subscription.unreadCount > 0"
+                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold"
+                        x-text="subscription.unreadCount > 99 ? '99+' : subscription.unreadCount"
+                      ></div>
+                    </div>
+
+                    <!-- 播客信息 -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0">
+                          <h3 class="text-lg font-semibold text-gray-900 mb-1" x-text="subscription.title"></h3>
+                          <p class="text-gray-600 mb-2" x-text="subscription.author"></p>
+                          <p class="text-sm text-gray-500 line-clamp-2 mb-3" x-text="subscription.description"></p>
+
+                          <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span x-text="subscription.episodeCount + ' 集'"></span>
+                            <span x-text="formatDate(subscription.lastEpisode)"></span>
+                            <span
+                              x-show="subscription.isActive"
+                              class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                            >
+                              活跃
+                            </span>
+                            <span
+                              x-show="!subscription.isActive"
+                              class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                            >
+                              暂停
+                            </span>
+                          </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="flex items-center space-x-2 ml-4">
+                          <!-- 通知开关 -->
+                          <button
+                            @click="toggleNotification(subscription)"
+                            class="p-2 rounded-lg transition-colors"
+                            :class="subscription.notificationEnabled 
+                              ? 'text-podcast-primary bg-podcast-primary/10 hover:bg-podcast-primary/20' 
+                              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'"
+                            :title="subscription.notificationEnabled ? '关闭通知' : '开启通知'"
+                          >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 17h5l-5 5-5-5h5v-5a7.5 7.5 0 01-7.5-7.5H7.5a7.5 7.5 0 017.5 7.5v5z"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          <!-- 播客详情 -->
+                          <button
+                            @click="goToPodcast(subscription)"
+                            class="p-2 text-gray-400 hover:text-podcast-primary hover:bg-podcast-primary/10 rounded-lg transition-colors"
+                            title="查看详情"
+                          >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              ></path>
+                            </svg>
+                          </button>
+
+                          <!-- 设置菜单 -->
+                          <div class="relative" x-data="{ open: false }">
+                            <button
+                              @click="open = !open"
+                              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                ></path>
+                              </svg>
+                            </button>
+
+                            <div
+                              x-show="open"
+                              @click.away="open = false"
+                              x-transition
+                              class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+                            >
+                              <div class="py-1">
+                                <button
+                                  @click="markAllAsRead(subscription); open = false"
+                                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  标记全部已读
+                                </button>
+                                <button
+                                  @click="downloadAllEpisodes(subscription); open = false"
+                                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  下载所有单集
+                                </button>
+                                <button
+                                  @click="editSubscriptionSettings(subscription); open = false"
+                                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  订阅设置
+                                </button>
+                                <hr class="my-1" />
+                                <button
+                                  @click="unsubscribe(subscription); open = false"
+                                  class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                  取消订阅
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 最新单集预览 -->
+                      <div x-show="subscription.latestEpisode" class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-1">最新单集</h4>
+                        <p class="text-sm text-gray-600 line-clamp-2" x-text="subscription.latestEpisode?.title"></p>
+                        <div class="flex items-center justify-between mt-2">
+                          <span
+                            class="text-xs text-gray-500"
+                            x-text="formatDate(subscription.latestEpisode?.publishDate)"
+                          ></span>
+                          <button
+                            @click="playEpisode(subscription.latestEpisode)"
+                            class="px-3 py-1 text-xs bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                          >
+                            播放
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- 空状态 -->
+          <div x-show="filteredSubscriptions.length === 0" class="text-center py-12">
+            <div class="text-gray-400 mb-4">
+              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">没有找到订阅</h3>
+            <p class="text-gray-600 mb-4">尝试调整搜索条件或者去发现更多播客</p>
+            <button
+              @click="goToDiscover"
+              class="px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+            >
+              发现播客
+            </button>
+          </div>
+
+          <!-- 分页 -->
+          <div x-show="totalPages > 1" class="flex items-center justify-center space-x-2 mt-8">
+            <button
+              @click="currentPage = Math.max(1, currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              上一页
+            </button>
+
+            <template x-for="page in visiblePages" :key="page">
+              <button
+                @click="currentPage = page"
+                class="px-3 py-2 border rounded-lg"
+                :class="page === currentPage 
+                  ? 'bg-podcast-primary text-white border-podcast-primary' 
+                  : 'border-gray-300 hover:bg-gray-50'"
+                x-text="page"
+              ></button>
+            </template>
+
+            <button
+              @click="currentPage = Math.min(totalPages, currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              下一页
+            </button>
+          </div>
+        </div>
+
+        <!-- 侧边栏 -->
+        <div class="lg:col-span-1">
+          <div class="space-y-6">
+            <!-- 快速操作 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">快速操作</h3>
+              <div class="space-y-3">
+                <button
+                  @click="refreshAllSubscriptions"
+                  class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                  </svg>
+                  <div>
+                    <div class="font-medium text-gray-900">刷新订阅</div>
+                    <div class="text-sm text-gray-500">检查新单集</div>
+                  </div>
+                </button>
+
+                <button
+                  @click="markAllAsRead()"
+                  class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                  </svg>
+                  <div>
+                    <div class="font-medium text-gray-900">全部已读</div>
+                    <div class="text-sm text-gray-500">标记所有单集已读</div>
+                  </div>
+                </button>
+
+                <button
+                  @click="showImportModal = true"
+                  class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    ></path>
+                  </svg>
+                  <div>
+                    <div class="font-medium text-gray-900">导入订阅</div>
+                    <div class="text-sm text-gray-500">从其他平台导入</div>
+                  </div>
+                </button>
+
+                <button
+                  @click="exportSubscriptions"
+                  class="w-full flex items-center px-4 py-3 text-left border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  <svg class="w-5 h-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                  </svg>
+                  <div>
+                    <div class="font-medium text-gray-900">导出订阅</div>
+                    <div class="text-sm text-gray-500">备份订阅列表</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- 订阅分类 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">订阅分类</h3>
+              <div class="space-y-2">
+                <template x-for="category in subscriptionCategories" :key="category.name">
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700" x-text="category.name"></span>
+                    <span class="text-sm text-gray-500" x-text="category.count"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 推荐播客 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">推荐订阅</h3>
+              <div class="space-y-4">
+                <template x-for="recommendation in recommendations" :key="recommendation.id">
+                  <div class="flex items-center space-x-3">
+                    <img
+                      :src="recommendation.image"
+                      :alt="recommendation.title"
+                      class="w-12 h-12 rounded-lg object-cover"
+                    />
+                    <div class="flex-1 min-w-0">
+                      <h4 class="font-medium text-gray-900 line-clamp-1" x-text="recommendation.title"></h4>
+                      <p class="text-sm text-gray-500" x-text="recommendation.author"></p>
+                    </div>
+                    <button
+                      @click="subscribe(recommendation)"
+                      class="px-3 py-1 text-sm bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+                    >
+                      订阅
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- 使用统计 -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">使用统计</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">本周新增</span>
+                  <span class="font-semibold text-green-600">+3</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">本月新增</span>
+                  <span class="font-semibold text-green-600">+12</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">取消订阅</span>
+                  <span class="font-semibold text-red-600">2</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">平均评分</span>
+                  <span class="font-semibold text-yellow-600">4.7</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 导入订阅模态框 -->
+    <div
+      x-show="showImportModal"
+      x-cloak
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+      @click.self="showImportModal = false"
+    >
+      <div class="bg-white rounded-xl w-full max-w-md">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-gray-900">导入订阅</h3>
+            <button @click="showImportModal = false" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">选择导入方式</label>
+              <div class="space-y-2">
+                <label class="flex items-center">
+                  <input
+                    type="radio"
+                    x-model="importMethod"
+                    value="opml"
+                    class="text-podcast-primary focus:ring-podcast-primary"
+                  />
+                  <span class="ml-3">OPML 文件</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="radio"
+                    x-model="importMethod"
+                    value="rss"
+                    class="text-podcast-primary focus:ring-podcast-primary"
+                  />
+                  <span class="ml-3">RSS 链接</span>
+                </label>
+                <label class="flex items-center">
+                  <input
+                    type="radio"
+                    x-model="importMethod"
+                    value="platform"
+                    class="text-podcast-primary focus:ring-podcast-primary"
+                  />
+                  <span class="ml-3">其他平台</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- OPML 文件上传 -->
+            <div x-show="importMethod === 'opml'">
+              <label class="block text-sm font-medium text-gray-700 mb-2">选择 OPML 文件</label>
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <input type="file" accept=".opml,.xml" class="hidden" x-ref="opmlFile" @change="handleFileUpload" />
+                <button @click="$refs.opmlFile.click()" class="text-podcast-primary hover:text-podcast-secondary">
+                  点击选择文件或拖拽到此处
+                </button>
+              </div>
+            </div>
+
+            <!-- RSS 链接输入 -->
+            <div x-show="importMethod === 'rss'">
+              <label class="block text-sm font-medium text-gray-700 mb-2">RSS 订阅链接</label>
+              <textarea
+                x-model="rssUrls"
+                rows="4"
+                placeholder="每行一个 RSS 链接..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-podcast-primary focus:border-transparent"
+              ></textarea>
+            </div>
+
+            <!-- 平台选择 -->
+            <div x-show="importMethod === 'platform'">
+              <label class="block text-sm font-medium text-gray-700 mb-2">选择平台</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  class="p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  Apple Podcasts
+                </button>
+                <button
+                  class="p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  Spotify
+                </button>
+                <button
+                  class="p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  Google Podcasts
+                </button>
+                <button
+                  class="p-3 border border-gray-200 rounded-lg hover:border-podcast-primary hover:bg-podcast-primary/5 transition-colors"
+                >
+                  其他
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex space-x-3 mt-6">
+            <button
+              @click="showImportModal = false"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              取消
+            </button>
+            <button
+              @click="performImport"
+              class="flex-1 px-4 py-2 bg-podcast-primary text-white rounded-lg hover:bg-podcast-secondary transition-colors"
+            >
+              开始导入
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../assets/js/script.js"></script>
+    <script>
+      function subscriptionApp() {
+        return {
+          searchQuery: "",
+          filterBy: "all",
+          sortBy: "recent",
+          selectedSubscriptions: [],
+          showBatchActions: false,
+          showImportModal: false,
+          importMethod: "opml",
+          rssUrls: "",
+          currentPage: 1,
+          itemsPerPage: 10,
+
+          subscriptions: [
+            {
+              id: 1,
+              title: "科技聊天室",
+              author: "科技小栈",
+              description: "深度探讨最新科技趋势和创新，为你解读数字时代的发展脉络。",
+              image: "https://images.unsplash.com/photo-1488229297570-58520851e868?w=400&h=400&fit=crop",
+              subscribedAt: "2024-01-15",
+              episodeCount: 125,
+              unreadCount: 8,
+              lastEpisode: "2024-01-20",
+              isActive: true,
+              notificationEnabled: true,
+              latestEpisode: {
+                title: "人工智能的未来展望：从GPT到AGI的演进之路",
+                publishDate: "2024-01-20",
+              },
+            },
+            {
+              id: 2,
+              title: "商业新视角",
+              author: "商业观察者",
+              description: "从不同角度解读商业世界的变化和机遇。",
+              image: "https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=300&h=300&fit=crop",
+              subscribedAt: "2024-01-10",
+              episodeCount: 89,
+              unreadCount: 3,
+              lastEpisode: "2024-01-18",
+              isActive: true,
+              notificationEnabled: false,
+              latestEpisode: {
+                title: "2024年商业趋势预测",
+                publishDate: "2024-01-18",
+              },
+            },
+            {
+              id: 3,
+              title: "创业故事",
+              author: "创业导师",
+              description: "真实的创业故事，分享成功与失败的经验。",
+              image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=300&h=300&fit=crop",
+              subscribedAt: "2023-12-20",
+              episodeCount: 156,
+              unreadCount: 0,
+              lastEpisode: "2024-01-15",
+              isActive: true,
+              notificationEnabled: true,
+              latestEpisode: {
+                title: "从零到独角兽：一个SaaS公司的成长之路",
+                publishDate: "2024-01-15",
+              },
+            },
+            {
+              id: 4,
+              title: "历史深度",
+              author: "历史学者",
+              description: "深入浅出地讲述历史故事和历史人物。",
+              image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=300&fit=crop",
+              subscribedAt: "2023-11-05",
+              episodeCount: 89,
+              unreadCount: 12,
+              lastEpisode: "2024-01-12",
+              isActive: false,
+              notificationEnabled: false,
+              latestEpisode: {
+                title: "明朝政治制度的演变",
+                publishDate: "2024-01-12",
+              },
+            },
+          ],
+
+          subscriptionCategories: [
+            { name: "科技", count: 8 },
+            { name: "商业", count: 5 },
+            { name: "历史", count: 3 },
+            { name: "文化", count: 4 },
+            { name: "教育", count: 6 },
+            { name: "娱乐", count: 2 },
+          ],
+
+          recommendations: [
+            {
+              id: 5,
+              title: "设计思维",
+              author: "设计师小王",
+              image: "https://images.unsplash.com/photo-1558618047-d2c40d8aac15?w=300&h=300&fit=crop",
+            },
+            {
+              id: 6,
+              title: "健康生活",
+              author: "健康专家",
+              image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit=crop",
+            },
+            {
+              id: 7,
+              title: "投资理财",
+              author: "理财顾问",
+              image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=300&h=300&fit=crop",
+            },
+          ],
+
+          get filteredSubscriptions() {
+            let filtered = this.subscriptions;
+
+            // 搜索过滤
+            if (this.searchQuery) {
+              filtered = filtered.filter(
+                (sub) =>
+                  sub.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                  sub.author.toLowerCase().includes(this.searchQuery.toLowerCase())
+              );
+            }
+
+            // 分类过滤
+            switch (this.filterBy) {
+              case "active":
+                filtered = filtered.filter((sub) => sub.isActive);
+                break;
+              case "paused":
+                filtered = filtered.filter((sub) => !sub.isActive);
+                break;
+              case "notifications":
+                filtered = filtered.filter((sub) => sub.notificationEnabled);
+                break;
+            }
+
+            // 排序
+            switch (this.sortBy) {
+              case "alphabetical":
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+              case "activity":
+                filtered.sort((a, b) => new Date(b.lastEpisode) - new Date(a.lastEpisode));
+                break;
+              case "unread":
+                filtered.sort((a, b) => b.unreadCount - a.unreadCount);
+                break;
+              case "recent":
+              default:
+                filtered.sort((a, b) => new Date(b.subscribedAt) - new Date(a.subscribedAt));
+                break;
+            }
+
+            // 分页
+            const start = (this.currentPage - 1) * this.itemsPerPage;
+            return filtered.slice(start, start + this.itemsPerPage);
+          },
+
+          get activeSubscriptions() {
+            return this.subscriptions.filter((sub) => sub.isActive).length;
+          },
+
+          get unreadEpisodes() {
+            return this.subscriptions.reduce((sum, sub) => sum + sub.unreadCount, 0);
+          },
+
+          get notificationEnabled() {
+            return this.subscriptions.filter((sub) => sub.notificationEnabled).length;
+          },
+
+          get totalPages() {
+            const totalItems = this.subscriptions.length;
+            return Math.ceil(totalItems / this.itemsPerPage);
+          },
+
+          get visiblePages() {
+            const current = this.currentPage;
+            const total = this.totalPages;
+            const delta = 2;
+            const range = [];
+            const rangeWithDots = [];
+
+            for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+              range.push(i);
+            }
+
+            if (current - delta > 2) {
+              rangeWithDots.push(1, "...");
+            } else {
+              rangeWithDots.push(1);
+            }
+
+            rangeWithDots.push(...range);
+
+            if (current + delta < total - 1) {
+              rangeWithDots.push("...", total);
+            } else if (total > 1) {
+              rangeWithDots.push(total);
+            }
+
+            return rangeWithDots;
+          },
+
+          selectAll() {
+            if (this.selectedSubscriptions.length === this.filteredSubscriptions.length) {
+              this.selectedSubscriptions = [];
+            } else {
+              this.selectedSubscriptions = this.filteredSubscriptions.map((sub) => sub.id);
+            }
+          },
+
+          toggleNotification(subscription) {
+            subscription.notificationEnabled = !subscription.notificationEnabled;
+            console.log(`${subscription.title}: ${subscription.notificationEnabled ? "开启" : "关闭"}通知`);
+          },
+
+          unsubscribe(subscription) {
+            if (confirm(`确定要取消订阅《${subscription.title}》吗？`)) {
+              this.subscriptions = this.subscriptions.filter((sub) => sub.id !== subscription.id);
+              console.log(`已取消订阅: ${subscription.title}`);
+            }
+          },
+
+          batchEnableNotifications() {
+            this.selectedSubscriptions.forEach((id) => {
+              const subscription = this.subscriptions.find((sub) => sub.id === id);
+              if (subscription) subscription.notificationEnabled = true;
+            });
+            console.log("批量开启通知");
+          },
+
+          batchDisableNotifications() {
+            this.selectedSubscriptions.forEach((id) => {
+              const subscription = this.subscriptions.find((sub) => sub.id === id);
+              if (subscription) subscription.notificationEnabled = false;
+            });
+            console.log("批量关闭通知");
+          },
+
+          batchUnsubscribe() {
+            if (confirm(`确定要取消选中的 ${this.selectedSubscriptions.length} 个订阅吗？`)) {
+              this.subscriptions = this.subscriptions.filter((sub) => !this.selectedSubscriptions.includes(sub.id));
+              this.selectedSubscriptions = [];
+              console.log("批量取消订阅");
+            }
+          },
+
+          batchMarkAsRead() {
+            this.selectedSubscriptions.forEach((id) => {
+              const subscription = this.subscriptions.find((sub) => sub.id === id);
+              if (subscription) subscription.unreadCount = 0;
+            });
+            console.log("批量标记已读");
+          },
+
+          markAllAsRead(subscription = null) {
+            if (subscription) {
+              subscription.unreadCount = 0;
+              console.log(`标记${subscription.title}全部已读`);
+            } else {
+              this.subscriptions.forEach((sub) => (sub.unreadCount = 0));
+              console.log("全部标记已读");
+            }
+          },
+
+          refreshAllSubscriptions() {
+            console.log("刷新所有订阅");
+          },
+
+          exportSubscriptions() {
+            console.log("导出订阅列表");
+          },
+
+          performImport() {
+            console.log(`使用${this.importMethod}方式导入订阅`);
+            this.showImportModal = false;
+          },
+
+          handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+              console.log("上传文件:", file.name);
+            }
+          },
+
+          subscribe(podcast) {
+            console.log(`订阅播客: ${podcast.title}`);
+          },
+
+          goToPodcast(subscription) {
+            console.log(`查看播客详情: ${subscription.title}`);
+          },
+
+          playEpisode(episode) {
+            console.log(`播放单集: ${episode.title}`);
+          },
+
+          downloadAllEpisodes(subscription) {
+            console.log(`下载${subscription.title}所有单集`);
+          },
+
+          editSubscriptionSettings(subscription) {
+            console.log(`编辑${subscription.title}订阅设置`);
+          },
+
+          goToDiscover() {
+            window.location.href = "home.html";
+          },
+
+          goBack() {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.href = "home.html";
+            }
+          },
+
+          formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) return "昨天";
+            if (diffDays < 7) return `${diffDays}天前`;
+            if (diffDays < 30) return `${Math.floor(diffDays / 7)}周前`;
+            return date.toLocaleDateString("zh-CN");
+          },
+        };
+      }
+    </script>
+  </body>
+</html>
